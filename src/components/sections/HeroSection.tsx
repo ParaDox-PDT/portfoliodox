@@ -208,19 +208,19 @@ export function HeroSection({ profile }: HeroSectionProps) {
             initial="hidden"
             animate="visible"
           >
-            <div className="relative w-72 h-80 sm:w-80 sm:h-96 mx-auto">
-              {/* Decorative Ring - Oval */}
-              <div className="absolute inset-0 rounded-[50%] border-2 border-dashed border-primary-300 dark:border-primary-700 animate-spin" style={{ animationDuration: '20s' }} />
+            <div className="relative w-72 h-72 sm:w-96 sm:h-96 mx-auto">
+              {/* Decorative Ring - Circle */}
+              <div className="absolute inset-0 rounded-full border-2 border-dashed border-primary-300 dark:border-primary-700 animate-spin" style={{ animationDuration: '20s' }} />
               
-              {/* Avatar Container - Oval */}
-              <div className="absolute inset-4 rounded-[50%] bg-gradient-to-br from-primary-400 to-secondary-500 p-1">
-                <div className="w-full h-full rounded-[50%] bg-gray-100 dark:bg-dark-card overflow-hidden">
+              {/* Avatar Container - Circle */}
+              <div className="absolute inset-4 rounded-full bg-gradient-to-br from-primary-400 to-secondary-500 p-1">
+                <div className="w-full h-full rounded-full bg-gray-100 dark:bg-dark-card overflow-hidden">
                   {profile?.avatarUrl ? (
                     <Image
                       src={profile.avatarUrl}
                       alt={profile.name}
                       fill
-                      className="object-cover rounded-[50%]"
+                      className="object-cover rounded-full"
                       priority
                     />
                   ) : (
