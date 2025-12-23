@@ -12,6 +12,22 @@ import { Button, Badge } from '@/components/ui';
 import type { Profile } from '@/types';
 
 // ===========================================
+// FLUTTER & DART ICONS
+// ===========================================
+
+const FlutterIcon = () => (
+  <svg viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor">
+    <path d="M14.314 0L2.3 12 6 15.7 21.684.013h-7.357L14.314 0zm.014 11.072L7.857 17.53l6.47 6.47H21.7l-6.46-6.468 6.46-6.46h-7.37z" />
+  </svg>
+);
+
+const DartIcon = () => (
+  <svg viewBox="0 0 24 24" className="w-6 h-6" fill="currentColor">
+    <path d="M4.105 4.105S9.158 1.58 11.684.316a3.079 3.079 0 0 1 1.481-.315c.766.047 1.677.788 1.677.788L24 9.948v9.789h-4.263V24H9.789l-9-9C.303 14.5 0 13.795 0 13.105c0-.319.18-.818.316-1.105l3.789-7.895zm.679.679v11.787c.002.543.021 1.024.498 1.508L10.204 23h8.533v-4.263L4.784 4.784zm12.055-.678c-.899-.896-1.809-1.78-2.74-2.643-.302-.267-.567-.468-1.07-.462-.37.014-.87.195-.87.195L6.341 4.105l10.498.001z" />
+  </svg>
+);
+
+// ===========================================
 // TYPES
 // ===========================================
 
@@ -87,6 +103,16 @@ export function HeroSection({ profile }: HeroSectionProps) {
                 </Badge>
               )}
             </motion.div>
+
+            {/* Name */}
+            {profile?.name && (
+              <motion.p
+                className="text-lg font-medium text-primary-500 mb-2"
+                variants={itemVariants}
+              >
+                {profile.name}
+              </motion.p>
+            )}
 
             {/* Title */}
             <motion.h1
@@ -182,19 +208,19 @@ export function HeroSection({ profile }: HeroSectionProps) {
             initial="hidden"
             animate="visible"
           >
-            <div className="relative w-72 h-72 sm:w-96 sm:h-96 mx-auto">
-              {/* Decorative Ring */}
-              <div className="absolute inset-0 rounded-full border-2 border-dashed border-primary-300 dark:border-primary-700 animate-spin" style={{ animationDuration: '20s' }} />
+            <div className="relative w-72 h-80 sm:w-80 sm:h-96 mx-auto">
+              {/* Decorative Ring - Oval */}
+              <div className="absolute inset-0 rounded-[50%] border-2 border-dashed border-primary-300 dark:border-primary-700 animate-spin" style={{ animationDuration: '20s' }} />
               
-              {/* Avatar Container */}
-              <div className="absolute inset-4 rounded-full bg-gradient-to-br from-primary-400 to-secondary-500 p-1">
-                <div className="w-full h-full rounded-full bg-gray-100 dark:bg-dark-card overflow-hidden">
+              {/* Avatar Container - Oval */}
+              <div className="absolute inset-4 rounded-[50%] bg-gradient-to-br from-primary-400 to-secondary-500 p-1">
+                <div className="w-full h-full rounded-[50%] bg-gray-100 dark:bg-dark-card overflow-hidden">
                   {profile?.avatarUrl ? (
                     <Image
                       src={profile.avatarUrl}
                       alt={profile.name}
                       fill
-                      className="object-cover"
+                      className="object-cover rounded-[50%]"
                       priority
                     />
                   ) : (
@@ -205,20 +231,20 @@ export function HeroSection({ profile }: HeroSectionProps) {
                 </div>
               </div>
 
-              {/* Floating Elements */}
+              {/* Floating Elements - Flutter & Dart Icons */}
               <motion.div
-                className="absolute -top-4 -right-4 bg-white dark:bg-dark-card rounded-xl shadow-lg p-3"
+                className="absolute -top-4 -right-4 bg-white dark:bg-dark-card rounded-xl shadow-lg p-3 text-[#02569B]"
                 animate={{ y: [0, -10, 0] }}
                 transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
               >
-                <span className="text-2xl">🚀</span>
+                <FlutterIcon />
               </motion.div>
               <motion.div
-                className="absolute -bottom-4 -left-4 bg-white dark:bg-dark-card rounded-xl shadow-lg p-3"
+                className="absolute -bottom-4 -left-4 bg-white dark:bg-dark-card rounded-xl shadow-lg p-3 text-[#0175C2]"
                 animate={{ y: [0, 10, 0] }}
                 transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
               >
-                <span className="text-2xl">💙</span>
+                <DartIcon />
               </motion.div>
             </div>
           </motion.div>

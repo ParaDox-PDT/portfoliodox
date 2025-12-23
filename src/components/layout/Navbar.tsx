@@ -12,6 +12,14 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui';
 
 // ===========================================
+// TYPES
+// ===========================================
+
+interface NavbarProps {
+  name?: string;
+}
+
+// ===========================================
 // NAVIGATION ITEMS
 // ===========================================
 
@@ -27,7 +35,7 @@ const navItems = [
 // COMPONENT
 // ===========================================
 
-export function Navbar() {
+export function Navbar({ name }: NavbarProps) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
@@ -73,10 +81,12 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-1 group">
-            <span className="text-primary-500 font-mono">&lt;</span>
-            <span className="font-bold text-gray-900 dark:text-white">Dev</span>
-            <span className="text-primary-500 font-mono">/&gt;</span>
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="flex items-center gap-1">
+              <span className="text-primary-500 font-mono">&lt;</span>
+              <span className="font-bold text-gray-900 dark:text-white">{name || 'Dev'}</span>
+              <span className="text-primary-500 font-mono">/&gt;</span>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}

@@ -8,10 +8,10 @@ export const mockProfile: Profile = {
   id: 'mock-profile',
   name: 'John Doe',
   title: 'Flutter Developer',
-  subtitle: 'building production-ready apps',
+  subtitle: '3 year experience',
   email: 'hello@example.com',
   phone: '+1 234 567 890',
-  location: 'San Francisco, CA',
+  location: 'Tashkent, Uzbekistan',
   bio: `Over the past 3+ years, I've had the privilege of working with startups and established companies to build production-grade mobile applications used by thousands of users daily.
 
 My approach combines technical excellence with a deep understanding of user needs. I believe that great apps aren't just about clean code—they're about solving real problems and delivering genuine value.`,
@@ -20,8 +20,9 @@ My approach combines technical excellence with a deep understanding of user need
   resumeUrl: '',
   github: 'https://github.com',
   linkedin: 'https://linkedin.com',
-  twitter: 'https://twitter.com',
   telegram: 'https://t.me',
+  hhuz: 'https://hh.uz',
+  website: '',
   yearsExperience: 3,
   projectsCompleted: 15,
   happyClients: 10,

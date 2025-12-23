@@ -4,9 +4,9 @@
 // ADMIN PROFILE PAGE
 // ===========================================
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Save, Loader2 } from 'lucide-react';
+import { Save, Loader2, Upload, FileText, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Button, Input, Textarea, Card, ImageUpload } from '@/components/ui';
 import { getProfile, updateProfile } from '@/lib/firestore';
@@ -33,13 +33,16 @@ export default function AdminProfilePage() {
     resumeUrl: '',
     github: '',
     linkedin: '',
-    twitter: '',
     telegram: '',
+    hhuz: '',
+    website: '',
     yearsExperience: 3,
     projectsCompleted: 15,
     happyClients: 10,
     availableForWork: true,
   });
+  const [uploadingResume, setUploadingResume] = useState(false);
+  const resumeInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch profile data
   useEffect(() => {
@@ -81,12 +84,39 @@ export default function AdminProfilePage() {
     return data || '';
   };
 
-  // Handle resume upload
-  const handleResumeUpload = async (file: File) => {
-    const { data, error } = await uploadResume(file);
-    if (error) throw new Error(error);
-    setProfile((prev) => ({ ...prev, resumeUrl: data || '' }));
-    return data || '';
+  // Handle resume file select
+  const handleResumeFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (file.type !== 'application/pdf') {
+      toast.error('Please upload a PDF file');
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('File size must be less than 10MB');
+      return;
+    }
+
+    setUploadingResume(true);
+    try {
+      const { data, error } = await uploadResume(file);
+      if (error) throw new Error(error);
+      setProfile((prev) => ({ ...prev, resumeUrl: data || '' }));
+      toast.success('Resume uploaded successfully!');
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to upload resume');
+    } finally {
+      setUploadingResume(false);
+    }
+  };
+
+  // Clear resume
+  const handleClearResume = () => {
+    setProfile((prev) => ({ ...prev, resumeUrl: '' }));
   };
 
   // Handle form submit
@@ -237,20 +267,27 @@ export default function AdminProfilePage() {
                 </div>
                 <div className="grid sm:grid-cols-2 gap-5">
                   <Input
-                    label="Twitter"
-                    name="twitter"
-                    value={profile.twitter || ''}
-                    onChange={handleChange}
-                    placeholder="https://twitter.com/username"
-                  />
-                  <Input
                     label="Telegram"
                     name="telegram"
                     value={profile.telegram || ''}
                     onChange={handleChange}
                     placeholder="https://t.me/username"
                   />
+                  <Input
+                    label="hh.uz"
+                    name="hhuz"
+                    value={profile.hhuz || ''}
+                    onChange={handleChange}
+                    placeholder="https://hh.uz/resume/..."
+                  />
                 </div>
+                <Input
+                  label="Personal Website"
+                  name="website"
+                  value={profile.website || ''}
+                  onChange={handleChange}
+                  placeholder="https://yourwebsite.com"
+                />
               </div>
             </Card>
 
@@ -309,14 +346,63 @@ export default function AdminProfilePage() {
               <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                 Resume
               </h2>
-              <Input
-                label="Resume URL"
-                name="resumeUrl"
-                value={profile.resumeUrl || ''}
-                onChange={handleChange}
-                placeholder="https://..."
-                hint="Or upload a PDF file"
+              
+              {/* Current Resume */}
+              {profile.resumeUrl && (
+                <div className="mb-4 p-3 bg-gray-50 dark:bg-dark-bg rounded-lg flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-5 h-5 text-primary-500" />
+                    <a 
+                      href={profile.resumeUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-sm text-primary-500 hover:underline truncate max-w-[150px]"
+                    >
+                      View Resume
+                    </a>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleClearResume}
+                    className="p-1 text-gray-400 hover:text-red-500 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+
+              {/* Upload Button */}
+              <input
+                ref={resumeInputRef}
+                type="file"
+                accept=".pdf"
+                onChange={handleResumeFileSelect}
+                className="hidden"
               />
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => resumeInputRef.current?.click()}
+                isLoading={uploadingResume}
+                leftIcon={<Upload className="w-4 h-4" />}
+              >
+                {uploadingResume ? 'Uploading...' : 'Upload PDF'}
+              </Button>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                Max file size: 10MB. Only PDF files allowed.
+              </p>
+
+              {/* Or Enter URL */}
+              <div className="mt-4 pt-4 border-t border-gray-200 dark:border-dark-border">
+                <Input
+                  label="Or enter URL manually"
+                  name="resumeUrl"
+                  value={profile.resumeUrl || ''}
+                  onChange={handleChange}
+                  placeholder="https://..."
+                />
+              </div>
             </Card>
 
             {/* Status */}

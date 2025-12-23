@@ -97,7 +97,7 @@ export default function HomePage() {
 
   return (
     <>
-      <Navbar />
+      <Navbar name={profile?.name} />
       
       <main>
         <HeroSection profile={profile} />

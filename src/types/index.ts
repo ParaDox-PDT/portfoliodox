@@ -21,8 +21,9 @@ export interface Profile {
   // Social links
   github?: string;
   linkedin?: string;
-  twitter?: string;
   telegram?: string;
+  hhuz?: string;
+  website?: string;
   // Stats
   yearsExperience: number;
   projectsCompleted: number;
