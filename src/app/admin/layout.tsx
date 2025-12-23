@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import {
   User,
@@ -96,9 +97,14 @@ function AdminLayoutContent({ children }: { children: React.ReactNode }) {
         {/* Sidebar Header */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-dark-border">
           <Link href="/admin" className="flex items-center gap-2">
-            <span className="text-primary-500 font-mono">&lt;</span>
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={32}
+              height={32}
+              className="w-8 h-8"
+            />
             <span className="font-bold text-gray-900 dark:text-white">Admin</span>
-            <span className="text-primary-500 font-mono">/&gt;</span>
           </Link>
           <button
             onClick={() => setIsSidebarOpen(false)}

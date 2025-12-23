@@ -7,6 +7,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
@@ -66,13 +67,17 @@ export default function AdminLoginPage() {
         <Card className="shadow-xl">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="flex items-center justify-center gap-1 mb-4">
-              <span className="text-primary-500 font-mono text-xl">&lt;</span>
-              <span className="font-bold text-2xl text-gray-900 dark:text-white">Admin</span>
-              <span className="text-primary-500 font-mono text-xl">/&gt;</span>
+            <div className="flex items-center justify-center mb-4">
+              <Image
+                src="/logo.png"
+                alt="Logo"
+                width={60}
+                height={60}
+                className="w-15 h-15"
+              />
             </div>
             <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Welcome Back
+              Admin Panel
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
               Sign in to manage your portfolio

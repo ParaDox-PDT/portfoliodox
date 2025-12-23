@@ -6,6 +6,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Sun, Moon } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -81,12 +82,19 @@ export function Navbar({ name }: NavbarProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="flex items-center gap-1">
-              <span className="text-primary-500 font-mono">&lt;</span>
-              <span className="font-bold text-gray-900 dark:text-white">{name || 'Dev'}</span>
-              <span className="text-primary-500 font-mono">/&gt;</span>
-            </div>
+          <Link href="/" className="flex items-center gap-3 group">
+            <Image
+              src="/logo.png"
+              alt="Logo"
+              width={40}
+              height={40}
+              className="w-10 h-10"
+            />
+            {name && (
+              <span className="font-bold text-gray-900 dark:text-white hidden sm:block">
+                {name}
+              </span>
+            )}
           </Link>
 
           {/* Desktop Navigation */}

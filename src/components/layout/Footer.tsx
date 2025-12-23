@@ -5,6 +5,7 @@
 // ===========================================
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { Github, Linkedin, Mail, Globe } from 'lucide-react';
 import type { Profile } from '@/types';
 
@@ -51,10 +52,19 @@ export function Footer({ profile }: FooterProps) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Brand */}
           <div>
-            <Link href="/" className="flex items-center gap-1">
-              <span className="text-primary-500 font-mono">&lt;</span>
-              <span className="font-bold text-gray-900 dark:text-white">Dev</span>
-              <span className="text-primary-500 font-mono">/&gt;</span>
+            <Link href="/" className="flex items-center gap-3">
+              <Image
+                src="/logo.png"
+                alt="Logo"
+                width={40}
+                height={40}
+                className="w-10 h-10"
+              />
+              {profile?.name && (
+                <span className="font-bold text-gray-900 dark:text-white">
+                  {profile.name}
+                </span>
+              )}
             </Link>
             <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
               Building exceptional mobile experiences with Flutter.
