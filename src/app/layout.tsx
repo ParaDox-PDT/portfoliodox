@@ -29,17 +29,24 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: 'Flutter Developer' }],
   creator: 'Flutter Developer',
+  icons: {
+    icon: '/logo.png',
+    shortcut: '/logo.png',
+    apple: '/logo.png',
+  },
   openGraph: {
     type: 'website',
     locale: 'en_US',
     siteName: 'Flutter Developer Portfolio',
     title: 'Flutter Developer | Mobile App Specialist',
     description: 'Professional Flutter Developer with 3+ years of experience building production-ready mobile applications.',
+    images: ['/logo.png'],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Flutter Developer | Mobile App Specialist',
     description: 'Professional Flutter Developer with 3+ years of experience building production-ready mobile applications.',
+    images: ['/logo.png'],
   },
   robots: {
     index: true,
