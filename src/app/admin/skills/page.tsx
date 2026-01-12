@@ -62,15 +62,44 @@ export default function AdminSkillsPage() {
   const [editingSkill, setEditingSkill] = useState<Skill | null>(null);
   const [formData, setFormData] = useState<Partial<Skill>>(initialFormState);
 
-  // Fetch skills
+  // Fetch skills on mount
   useEffect(() => {
     fetchSkills();
   }, []);
 
   const fetchSkills = async () => {
-    const { data } = await getSkills();
-    setSkills(data || []);
-    setLoading(false);
+    try {
+      setLoading(true);
+      const { data, error } = await getSkills();
+      
+      if (error) {
+        console.error('Error fetching skills:', error);
+        // Don't show toast on initial load to avoid spam
+        if (skills.length > 0) {
+          toast.error(`Failed to reload skills: ${error}`);
+        }
+        // Keep existing skills if error occurs during refresh
+        if (skills.length === 0) {
+          setSkills([]);
+        }
+      } else {
+        const skillsData = data || [];
+        setSkills(skillsData);
+        if (skillsData.length > 0) {
+          console.log(`✅ Loaded ${skillsData.length} skills from Firebase`);
+        } else {
+          console.log('ℹ️ No skills found in Firebase');
+        }
+      }
+    } catch (err: any) {
+      console.error('Unexpected error fetching skills:', err);
+      if (skills.length === 0) {
+        toast.error('Failed to load skills');
+        setSkills([]);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Handle input change
@@ -125,8 +154,13 @@ export default function AdminSkillsPage() {
       }
 
       setIsModalOpen(false);
-      fetchSkills();
+      // Reset form
+      setFormData(initialFormState);
+      setEditingSkill(null);
+      // Refresh skills list after save
+      await fetchSkills();
     } catch (err: any) {
+      console.error('Error saving skill:', err);
       toast.error(err.message || 'Failed to save skill');
     } finally {
       setSaving(false);
@@ -141,8 +175,10 @@ export default function AdminSkillsPage() {
       const { error } = await deleteSkill(id);
       if (error) throw new Error(error);
       toast.success('Skill deleted successfully!');
-      fetchSkills();
+      // Refresh skills list after delete
+      await fetchSkills();
     } catch (err: any) {
+      console.error('Error deleting skill:', err);
       toast.error(err.message || 'Failed to delete skill');
     }
   };

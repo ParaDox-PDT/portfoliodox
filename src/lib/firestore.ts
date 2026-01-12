@@ -21,6 +21,8 @@ import {
 import type {
   Profile,
   Skill,
+  SkillCategory,
+  SkillLevel,
   Experience,
   Project,
   Certificate,
@@ -143,20 +145,43 @@ export async function updateProfile(data: Partial<Profile>): Promise<FirebaseRes
 export async function getSkills(): Promise<FirebaseResponse<Skill[]>> {
   try {
     const database = getDb();
-    const q = query(
-      collection(database, COLLECTIONS.SKILLS),
-      orderBy('category'),
-      orderBy('order')
-    );
-    const querySnapshot = await getDocs(q);
+    
+    // Try with composite index first, fallback to single orderBy if index doesn't exist
+    let querySnapshot;
+    try {
+      const q = query(
+        collection(database, COLLECTIONS.SKILLS),
+        orderBy('category'),
+        orderBy('order')
+      );
+      querySnapshot = await getDocs(q);
+    } catch (indexError: any) {
+      // If composite index doesn't exist, use single orderBy and sort client-side
+      console.warn('Composite index not found, using client-side sorting:', indexError.message);
+      const q = query(
+        collection(database, COLLECTIONS.SKILLS),
+        orderBy('order')
+      );
+      querySnapshot = await getDocs(q);
+    }
+    
     const skills = querySnapshot.docs.map(doc => {
       const data = convertTimestamps({ id: doc.id, ...doc.data() });
       return data as Skill;
     });
     
+    // Sort by category then order (if not using composite index)
+    skills.sort((a, b) => {
+      if (a.category !== b.category) {
+        return a.category.localeCompare(b.category);
+      }
+      return (a.order || 0) - (b.order || 0);
+    });
+    
     return { data: skills, error: null };
   } catch (error: any) {
     console.error('Error getting skills:', error);
+    // Return empty array instead of throwing to prevent app crash
     return { data: [], error: error.message };
   }
 }
@@ -164,14 +189,32 @@ export async function getSkills(): Promise<FirebaseResponse<Skill[]>> {
 export async function addSkill(data: Omit<Skill, 'id'>): Promise<FirebaseResponse<Skill>> {
   try {
     const database = getDb();
-    const docRef = await addDoc(collection(database, COLLECTIONS.SKILLS), {
-      ...data,
+    
+    // Ensure required fields have default values
+    const skillData = {
+      name: data.name || '',
+      category: data.category || 'other',
+      level: data.level || 'intermediate',
+      order: data.order ?? 0,
       createdAt: serverTimestamp(),
-    });
-    return { data: { id: docRef.id, ...data }, error: null };
+    };
+    
+    const docRef = await addDoc(collection(database, COLLECTIONS.SKILLS), skillData);
+    
+    // Return the created skill with id
+    const createdSkill: Skill = {
+      id: docRef.id,
+      name: skillData.name,
+      category: skillData.category as SkillCategory,
+      level: skillData.level as SkillLevel,
+      order: skillData.order,
+    };
+    
+    console.log('Skill added successfully:', createdSkill);
+    return { data: createdSkill, error: null };
   } catch (error: any) {
     console.error('Error adding skill:', error);
-    return { data: null, error: error.message };
+    return { data: null, error: error.message || 'Failed to add skill' };
   }
 }
 

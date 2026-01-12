@@ -86,12 +86,28 @@ export default function HomePage() {
           setProfile(null);
         }
 
+        // Skills: Always prefer Firebase data, only use mock in development if Firebase fails
         if (skillsRes.data && skillsRes.data.length > 0) {
+          console.log(`✅ Loaded ${skillsRes.data.length} skills from Firebase`);
           setSkills(skillsRes.data);
-        } else if (isDevelopment) {
-          setSkills(mockSkills);
+        } else if (skillsRes.error) {
+          console.warn('⚠️ Firebase skills error:', skillsRes.error);
+          // Only use mock data in development if there's an error
+          if (isDevelopment) {
+            console.warn('Using mock skills data in development');
+            setSkills(mockSkills);
+          } else {
+            setSkills([]);
+          }
         } else {
-          setSkills([]);
+          // No error but no data - check if Firebase is working
+          console.log('ℹ️ No skills found in Firebase (empty collection)');
+          // In production, show empty state. In development, use mock for testing
+          if (isDevelopment) {
+            setSkills(mockSkills);
+          } else {
+            setSkills([]);
+          }
         }
 
         if (experienceRes.data && experienceRes.data.length > 0) {
