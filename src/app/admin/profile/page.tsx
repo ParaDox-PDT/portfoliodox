@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 import { Button, Input, Textarea, Card, ImageUpload } from '@/components/ui';
 import { getProfile, updateProfile } from '@/lib/firestore';
 import { uploadProfileImage, uploadResume } from '@/lib/storage';
+import { validateProfile } from '@/lib/utils';
 import type { Profile } from '@/types';
 
 // ===========================================
@@ -122,6 +123,14 @@ export default function AdminProfilePage() {
   // Handle form submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form data
+    const validation = validateProfile(profile);
+    if (!validation.isValid) {
+      toast.error(validation.error || 'Please fix the form errors');
+      return;
+    }
+    
     setSaving(true);
 
     try {

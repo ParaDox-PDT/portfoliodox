@@ -18,7 +18,7 @@ import {
   Modal,
 } from '@/components/ui';
 import { getExperience, addExperience, updateExperience, deleteExperience } from '@/lib/firestore';
-import { formatDateRange } from '@/lib/utils';
+import { formatDateRange, validateExperience } from '@/lib/utils';
 import type { Experience, EmploymentType } from '@/types';
 
 // ===========================================
@@ -150,6 +150,14 @@ export default function AdminExperiencePage() {
   // Handle form submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form data
+    const validation = validateExperience(formData);
+    if (!validation.isValid) {
+      toast.error(validation.error || 'Please fix the form errors');
+      return;
+    }
+    
     setSaving(true);
 
     try {

@@ -20,7 +20,7 @@ import {
 } from '@/components/ui';
 import { getCertificates, addCertificate, updateCertificate, deleteCertificate } from '@/lib/firestore';
 import { uploadCertificateImage } from '@/lib/storage';
-import { formatDate } from '@/lib/utils';
+import { formatDate, validateCertificate } from '@/lib/utils';
 import type { Certificate } from '@/types';
 
 // ===========================================
@@ -119,6 +119,14 @@ export default function AdminCertificatesPage() {
   // Handle form submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form data
+    const validation = validateCertificate(formData);
+    if (!validation.isValid) {
+      toast.error(validation.error || 'Please fix the form errors');
+      return;
+    }
+    
     setSaving(true);
 
     try {

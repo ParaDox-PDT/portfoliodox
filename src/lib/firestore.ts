@@ -16,9 +16,7 @@ import {
   orderBy,
   limit,
   serverTimestamp,
-  getFirestore,
-  Firestore,
-  initializeFirestore,
+  Timestamp,
 } from 'firebase/firestore';
 import type {
   Profile,
@@ -28,37 +26,58 @@ import type {
   Certificate,
   FirebaseResponse,
 } from '@/types';
-import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
+import { getFirestoreDb } from './firebase';
 
 // ===========================================
-// FIREBASE INITIALIZATION
+// FIRESTORE UTILITIES
 // ===========================================
 
-const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-};
-
-let firebaseApp: FirebaseApp | null = null;
-let firestoreDb: Firestore | null = null;
-
-function getFirebaseApp(): FirebaseApp {
-  if (!firebaseApp) {
-    firebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+/**
+ * Convert Firestore Timestamp to JavaScript Date
+ */
+function convertTimestamp(value: any): any {
+  if (value && typeof value === 'object') {
+    if (value.constructor.name === 'Timestamp' || value.toDate) {
+      return value.toDate();
+    }
+    if (value.seconds) {
+      return new Date(value.seconds * 1000);
+    }
   }
-  return firebaseApp;
+  return value;
 }
 
-function getDb(): Firestore {
-  if (!firestoreDb) {
-    const app = getFirebaseApp();
-    firestoreDb = getFirestore(app);
+/**
+ * Recursively convert all Timestamps in an object to Dates
+ */
+function convertTimestamps(data: any): any {
+  if (data === null || data === undefined) {
+    return data;
   }
-  return firestoreDb;
+
+  if (Array.isArray(data)) {
+    return data.map(item => convertTimestamps(item));
+  }
+
+  if (typeof data === 'object') {
+    const converted: any = {};
+    for (const key in data) {
+      if (data.hasOwnProperty(key)) {
+        converted[key] = convertTimestamps(convertTimestamp(data[key]));
+      }
+    }
+    return converted;
+  }
+
+  return data;
+}
+
+/**
+ * Get Firestore database instance
+ * Uses centralized Firebase initialization
+ */
+function getDb() {
+  return getFirestoreDb();
 }
 
 // ===========================================
@@ -84,7 +103,8 @@ export async function getProfile(): Promise<FirebaseResponse<Profile>> {
     const docSnap = await getDoc(docRef);
     
     if (docSnap.exists()) {
-      return { data: { id: docSnap.id, ...docSnap.data() } as Profile, error: null };
+      const data = convertTimestamps({ id: docSnap.id, ...docSnap.data() });
+      return { data: data as Profile, error: null };
     }
     return { data: null, error: null };
   } catch (error: any) {
@@ -100,7 +120,8 @@ export async function updateProfile(data: Partial<Profile>): Promise<FirebaseRes
     await setDoc(docRef, { ...data, updatedAt: serverTimestamp() }, { merge: true });
     
     const updated = await getDoc(docRef);
-    return { data: { id: updated.id, ...updated.data() } as Profile, error: null };
+    const convertedData = convertTimestamps({ id: updated.id, ...updated.data() });
+    return { data: convertedData as Profile, error: null };
   } catch (error: any) {
     console.error('Error updating profile:', error);
     return { data: null, error: error.message };
@@ -120,10 +141,10 @@ export async function getSkills(): Promise<FirebaseResponse<Skill[]>> {
       orderBy('order')
     );
     const querySnapshot = await getDocs(q);
-    const skills = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Skill[];
+    const skills = querySnapshot.docs.map(doc => {
+      const data = convertTimestamps({ id: doc.id, ...doc.data() });
+      return data as Skill;
+    });
     
     return { data: skills, error: null };
   } catch (error: any) {
@@ -152,7 +173,8 @@ export async function updateSkill(id: string, data: Partial<Skill>): Promise<Fir
     const docRef = doc(database, COLLECTIONS.SKILLS, id);
     await updateDoc(docRef, data);
     const updated = await getDoc(docRef);
-    return { data: { id: updated.id, ...updated.data() } as Skill, error: null };
+    const convertedData = convertTimestamps({ id: updated.id, ...updated.data() });
+    return { data: convertedData as Skill, error: null };
   } catch (error: any) {
     console.error('Error updating skill:', error);
     return { data: null, error: error.message };
@@ -182,10 +204,10 @@ export async function getExperience(): Promise<FirebaseResponse<Experience[]>> {
       orderBy('order')
     );
     const querySnapshot = await getDocs(q);
-    const experience = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Experience[];
+    const experience = querySnapshot.docs.map(doc => {
+      const data = convertTimestamps({ id: doc.id, ...doc.data() });
+      return data as Experience;
+    });
     
     return { data: experience, error: null };
   } catch (error: any) {
@@ -214,7 +236,8 @@ export async function updateExperience(id: string, data: Partial<Experience>): P
     const docRef = doc(database, COLLECTIONS.EXPERIENCE, id);
     await updateDoc(docRef, data);
     const updated = await getDoc(docRef);
-    return { data: { id: updated.id, ...updated.data() } as Experience, error: null };
+    const convertedData = convertTimestamps({ id: updated.id, ...updated.data() });
+    return { data: convertedData as Experience, error: null };
   } catch (error: any) {
     console.error('Error updating experience:', error);
     return { data: null, error: error.message };
@@ -244,10 +267,10 @@ export async function getProjects(): Promise<FirebaseResponse<Project[]>> {
       orderBy('order')
     );
     const querySnapshot = await getDocs(q);
-    const projects = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Project[];
+    const projects = querySnapshot.docs.map(doc => {
+      const data = convertTimestamps({ id: doc.id, ...doc.data() });
+      return data as Project;
+    });
     
     return { data: projects, error: null };
   } catch (error: any) {
@@ -266,10 +289,10 @@ export async function getFeaturedProjects(): Promise<FirebaseResponse<Project[]>
       limit(4)
     );
     const querySnapshot = await getDocs(q);
-    const projects = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Project[];
+    const projects = querySnapshot.docs.map(doc => {
+      const data = convertTimestamps({ id: doc.id, ...doc.data() });
+      return data as Project;
+    });
     
     return { data: projects, error: null };
   } catch (error: any) {
@@ -293,10 +316,46 @@ export async function getProjectBySlug(slug: string): Promise<FirebaseResponse<P
     }
     
     const docSnap = querySnapshot.docs[0];
-    return { data: { id: docSnap.id, ...docSnap.data() } as Project, error: null };
+    const convertedData = convertTimestamps({ id: docSnap.id, ...docSnap.data() });
+    return { data: convertedData as Project, error: null };
   } catch (error: any) {
     console.error('Error getting project:', error);
     return { data: null, error: error.message };
+  }
+}
+
+/**
+ * Check if a project slug already exists
+ * @param slug - The slug to check
+ * @param excludeId - Optional project ID to exclude from check (for updates)
+ * @returns true if slug exists, false otherwise
+ */
+export async function checkSlugExists(slug: string, excludeId?: string): Promise<FirebaseResponse<boolean>> {
+  try {
+    const database = getDb();
+    const q = query(
+      collection(database, COLLECTIONS.PROJECTS),
+      where('slug', '==', slug),
+      limit(1)
+    );
+    const querySnapshot = await getDocs(q);
+    
+    if (querySnapshot.empty) {
+      return { data: false, error: null };
+    }
+    
+    // If checking for update, exclude the current project
+    if (excludeId) {
+      const existingProject = querySnapshot.docs[0];
+      if (existingProject.id === excludeId) {
+        return { data: false, error: null };
+      }
+    }
+    
+    return { data: true, error: null };
+  } catch (error: any) {
+    console.error('Error checking slug:', error);
+    return { data: false, error: error.message };
   }
 }
 
@@ -307,7 +366,8 @@ export async function getProjectById(id: string): Promise<FirebaseResponse<Proje
     const docSnap = await getDoc(docRef);
     
     if (docSnap.exists()) {
-      return { data: { id: docSnap.id, ...docSnap.data() } as Project, error: null };
+      const convertedData = convertTimestamps({ id: docSnap.id, ...docSnap.data() });
+      return { data: convertedData as Project, error: null };
     }
     return { data: null, error: 'Project not found' };
   } catch (error: any) {
@@ -318,6 +378,17 @@ export async function getProjectById(id: string): Promise<FirebaseResponse<Proje
 
 export async function addProject(data: Omit<Project, 'id'>): Promise<FirebaseResponse<Project>> {
   try {
+    // Check if slug already exists
+    if (data.slug) {
+      const slugCheck = await checkSlugExists(data.slug);
+      if (slugCheck.error) {
+        return { data: null, error: slugCheck.error };
+      }
+      if (slugCheck.data) {
+        return { data: null, error: `A project with slug "${data.slug}" already exists. Please use a different slug.` };
+      }
+    }
+    
     const database = getDb();
     const docRef = await addDoc(collection(database, COLLECTIONS.PROJECTS), {
       ...data,
@@ -332,11 +403,23 @@ export async function addProject(data: Omit<Project, 'id'>): Promise<FirebaseRes
 
 export async function updateProject(id: string, data: Partial<Project>): Promise<FirebaseResponse<Project>> {
   try {
+    // Check if slug is being changed and if it already exists
+    if (data.slug) {
+      const slugCheck = await checkSlugExists(data.slug, id);
+      if (slugCheck.error) {
+        return { data: null, error: slugCheck.error };
+      }
+      if (slugCheck.data) {
+        return { data: null, error: `A project with slug "${data.slug}" already exists. Please use a different slug.` };
+      }
+    }
+    
     const database = getDb();
     const docRef = doc(database, COLLECTIONS.PROJECTS, id);
     await updateDoc(docRef, data);
     const updated = await getDoc(docRef);
-    return { data: { id: updated.id, ...updated.data() } as Project, error: null };
+    const convertedData = convertTimestamps({ id: updated.id, ...updated.data() });
+    return { data: convertedData as Project, error: null };
   } catch (error: any) {
     console.error('Error updating project:', error);
     return { data: null, error: error.message };
@@ -366,10 +449,10 @@ export async function getCertificates(): Promise<FirebaseResponse<Certificate[]>
       orderBy('order')
     );
     const querySnapshot = await getDocs(q);
-    const certificates = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    })) as Certificate[];
+    const certificates = querySnapshot.docs.map(doc => {
+      const data = convertTimestamps({ id: doc.id, ...doc.data() });
+      return data as Certificate;
+    });
     
     return { data: certificates, error: null };
   } catch (error: any) {
@@ -398,7 +481,8 @@ export async function updateCertificate(id: string, data: Partial<Certificate>):
     const docRef = doc(database, COLLECTIONS.CERTIFICATES, id);
     await updateDoc(docRef, data);
     const updated = await getDoc(docRef);
-    return { data: { id: updated.id, ...updated.data() } as Certificate, error: null };
+    const convertedData = convertTimestamps({ id: updated.id, ...updated.data() });
+    return { data: convertedData as Certificate, error: null };
   } catch (error: any) {
     console.error('Error updating certificate:', error);
     return { data: null, error: error.message };

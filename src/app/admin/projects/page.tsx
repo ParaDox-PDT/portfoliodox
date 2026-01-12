@@ -21,7 +21,7 @@ import {
 } from '@/components/ui';
 import { getProjects, addProject, updateProject, deleteProject } from '@/lib/firestore';
 import { uploadProjectThumbnail } from '@/lib/storage';
-import { generateSlug } from '@/lib/utils';
+import { generateSlug, validateProject } from '@/lib/utils';
 import type { Project, ProjectCategory } from '@/types';
 
 // ===========================================
@@ -175,6 +175,14 @@ export default function AdminProjectsPage() {
   // Handle form submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form data
+    const validation = validateProject(formData);
+    if (!validation.isValid) {
+      toast.error(validation.error || 'Please fix the form errors');
+      return;
+    }
+    
     setSaving(true);
 
     try {

@@ -17,7 +17,7 @@ import {
   Modal,
 } from '@/components/ui';
 import { getSkills, addSkill, updateSkill, deleteSkill } from '@/lib/firestore';
-import { groupBy, capitalize } from '@/lib/utils';
+import { groupBy, capitalize, validateSkill } from '@/lib/utils';
 import type { Skill, SkillCategory, SkillLevel } from '@/types';
 
 // ===========================================
@@ -101,6 +101,14 @@ export default function AdminSkillsPage() {
   // Handle form submit
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate form data
+    const validation = validateSkill(formData);
+    if (!validation.isValid) {
+      toast.error(validation.error || 'Please fix the form errors');
+      return;
+    }
+    
     setSaving(true);
 
     try {

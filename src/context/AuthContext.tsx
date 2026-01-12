@@ -11,12 +11,9 @@ import {
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   createUserWithEmailAndPassword,
-  getAuth,
-  Auth,
 } from 'firebase/auth';
-import { initializeApp, getApps, getApp } from 'firebase/app';
 import { useRouter } from 'next/navigation';
-import { firebaseConfig } from '@/lib/firebase';
+import { getFirebaseAuth } from '@/lib/firebase';
 
 // ===========================================
 // TYPES
@@ -42,10 +39,9 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // GET AUTH INSTANCE
 // ===========================================
 
-function getAuthInstance(): Auth | null {
+function getAuthInstance() {
   if (typeof window === 'undefined') return null;
-  const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-  return getAuth(app);
+  return getFirebaseAuth();
 }
 
 // ===========================================

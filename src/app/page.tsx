@@ -50,27 +50,83 @@ export default function HomePage() {
       try {
         // Try to fetch from Firebase
         const [profileRes, skillsRes, experienceRes, projectsRes, certificatesRes] = await Promise.all([
-          getProfile().catch(() => ({ data: null, error: 'Failed' })),
-          getSkills().catch(() => ({ data: [], error: 'Failed' })),
-          getExperience().catch(() => ({ data: [], error: 'Failed' })),
-          getProjects().catch(() => ({ data: [], error: 'Failed' })),
-          getCertificates().catch(() => ({ data: [], error: 'Failed' })),
+          getProfile().catch((err) => {
+            console.error('Error fetching profile:', err);
+            return { data: null, error: err.message || 'Failed to fetch profile' };
+          }),
+          getSkills().catch((err) => {
+            console.error('Error fetching skills:', err);
+            return { data: [], error: err.message || 'Failed to fetch skills' };
+          }),
+          getExperience().catch((err) => {
+            console.error('Error fetching experience:', err);
+            return { data: [], error: err.message || 'Failed to fetch experience' };
+          }),
+          getProjects().catch((err) => {
+            console.error('Error fetching projects:', err);
+            return { data: [], error: err.message || 'Failed to fetch projects' };
+          }),
+          getCertificates().catch((err) => {
+            console.error('Error fetching certificates:', err);
+            return { data: [], error: err.message || 'Failed to fetch certificates' };
+          }),
         ]);
 
-        // Use Firebase data if available, otherwise use mock data
-        setProfile(profileRes.data || mockProfile);
-        setSkills(skillsRes.data && skillsRes.data.length > 0 ? skillsRes.data : mockSkills);
-        setExperience(experienceRes.data && experienceRes.data.length > 0 ? experienceRes.data : mockExperience);
-        setProjects(projectsRes.data && projectsRes.data.length > 0 ? projectsRes.data : mockProjects);
-        setCertificates(certificatesRes.data && certificatesRes.data.length > 0 ? certificatesRes.data : mockCertificates);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        // Use mock data on error
-        setProfile(mockProfile);
-        setSkills(mockSkills);
-        setExperience(mockExperience);
-        setProjects(mockProjects);
-        setCertificates(mockCertificates);
+        // Check if we're in development mode
+        const isDevelopment = process.env.NODE_ENV === 'development';
+
+        // Use Firebase data if available
+        // In production, show empty state if no data
+        // In development, fallback to mock data for easier testing
+        if (profileRes.data) {
+          setProfile(profileRes.data);
+        } else if (isDevelopment) {
+          setProfile(mockProfile);
+        } else {
+          setProfile(null);
+        }
+
+        if (skillsRes.data && skillsRes.data.length > 0) {
+          setSkills(skillsRes.data);
+        } else if (isDevelopment) {
+          setSkills(mockSkills);
+        } else {
+          setSkills([]);
+        }
+
+        if (experienceRes.data && experienceRes.data.length > 0) {
+          setExperience(experienceRes.data);
+        } else if (isDevelopment) {
+          setExperience(mockExperience);
+        } else {
+          setExperience([]);
+        }
+
+        if (projectsRes.data && projectsRes.data.length > 0) {
+          setProjects(projectsRes.data);
+        } else if (isDevelopment) {
+          setProjects(mockProjects);
+        } else {
+          setProjects([]);
+        }
+
+        if (certificatesRes.data && certificatesRes.data.length > 0) {
+          setCertificates(certificatesRes.data);
+        } else if (isDevelopment) {
+          setCertificates(mockCertificates);
+        } else {
+          setCertificates([]);
+        }
+      } catch (error: any) {
+        console.error('Unexpected error fetching data:', error);
+        // Only use mock data in development
+        if (process.env.NODE_ENV === 'development') {
+          setProfile(mockProfile);
+          setSkills(mockSkills);
+          setExperience(mockExperience);
+          setProjects(mockProjects);
+          setCertificates(mockCertificates);
+        }
       } finally {
         setLoading(false);
       }
