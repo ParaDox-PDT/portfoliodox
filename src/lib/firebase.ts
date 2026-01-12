@@ -22,9 +22,9 @@ const firebaseConfig = {
 
 /**
  * Validate Firebase configuration
- * Throws error if required environment variables are missing
+ * Returns validation result instead of throwing error
  */
-function validateFirebaseConfig(): void {
+function validateFirebaseConfig(): { isValid: boolean; missing: string[] } {
   const required = [
     'NEXT_PUBLIC_FIREBASE_API_KEY',
     'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN',
@@ -35,17 +35,19 @@ function validateFirebaseConfig(): void {
   ];
 
   const missing = required.filter(key => !process.env[key]);
-  if (missing.length > 0) {
-    throw new Error(
-      `Missing required Firebase environment variables: ${missing.join(', ')}\n` +
-      'Please check your .env.local file and ensure all Firebase config values are set.'
+  
+  if (missing.length > 0 && typeof window !== 'undefined') {
+    console.warn(
+      '⚠️ Missing Firebase environment variables:',
+      missing.join(', '),
+      '\nPlease check your .env.local file and ensure all Firebase config values are set.'
     );
   }
-}
-
-// Validate config on module load (only in client-side)
-if (typeof window !== 'undefined') {
-  validateFirebaseConfig();
+  
+  return {
+    isValid: missing.length === 0,
+    missing,
+  };
 }
 
 /**
@@ -61,8 +63,22 @@ let storage: FirebaseStorage | null = null;
 function getFirebaseApp(): FirebaseApp {
   if (!app) {
     if (getApps().length === 0) {
-      validateFirebaseConfig();
-      app = initializeApp(firebaseConfig);
+      // Validate config before initializing
+      const validation = validateFirebaseConfig();
+      if (!validation.isValid) {
+        // Still try to initialize, but log warning
+        console.warn('Firebase initialization may fail due to missing environment variables');
+      }
+      
+      try {
+        app = initializeApp(firebaseConfig);
+      } catch (error: any) {
+        console.error('Firebase initialization error:', error);
+        throw new Error(
+          `Failed to initialize Firebase: ${error.message}\n` +
+          'Please check your Firebase configuration in .env.local file.'
+        );
+      }
     } else {
       app = getApp();
     }

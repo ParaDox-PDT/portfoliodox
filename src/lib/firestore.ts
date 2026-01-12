@@ -77,7 +77,15 @@ function convertTimestamps(data: any): any {
  * Uses centralized Firebase initialization
  */
 function getDb() {
-  return getFirestoreDb();
+  try {
+    return getFirestoreDb();
+  } catch (error: any) {
+    console.error('Error getting Firestore database:', error);
+    throw new Error(
+      `Failed to connect to Firestore: ${error.message}\n` +
+      'Please check your Firebase configuration.'
+    );
+  }
 }
 
 // ===========================================
