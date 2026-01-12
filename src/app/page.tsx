@@ -140,15 +140,10 @@ export default function HomePage() {
     return () => clearTimeout(timer);
   }, []);
 
+  // Don't show loading spinner - IntroLoader handles initial loading
+  // Only show content when data is ready
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-dark-bg">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-primary-500 mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Loading portfolio...</p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (

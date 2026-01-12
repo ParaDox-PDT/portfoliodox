@@ -74,14 +74,18 @@ export const viewport: Viewport = {
 // LAYOUT COMPONENT
 // ===========================================
 
+import { IntroLoader } from '@/components/IntroLoader';
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="dark">
       <body className="antialiased">
+        {/* Intro Loader - Client Component */}
+        <IntroLoader />
         {children}
         <Toaster
           position="bottom-right"
