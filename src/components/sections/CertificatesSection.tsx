@@ -4,12 +4,13 @@
 // CERTIFICATES SECTION COMPONENT
 // ===========================================
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { ExternalLink, Award, Calendar } from 'lucide-react';
+import { ExternalLink, Award, Calendar, X, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import { SectionHeader } from '@/components/ui/SectionHeader';
-import { Card, Badge, Button, Modal } from '@/components/ui';
+import { Card, Badge, Button } from '@/components/ui';
 import { formatDate } from '@/lib/utils';
 import type { Certificate } from '@/types';
 
@@ -53,6 +54,18 @@ const itemVariants = {
 export function CertificatesSection({ certificates }: CertificatesSectionProps) {
   const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null);
 
+  // Prevent body scroll when modal is open
+  useEffect(() => {
+    if (selectedCertificate) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [selectedCertificate]);
+
   if (!certificates || certificates.length === 0) {
     return null;
   }
@@ -66,6 +79,21 @@ export function CertificatesSection({ certificates }: CertificatesSectionProps) 
   const handleCloseModal = () => {
     setSelectedCertificate(null);
   };
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Escape' && selectedCertificate) {
+      handleCloseModal();
+    }
+  };
+
+  useEffect(() => {
+    if (selectedCertificate) {
+      window.addEventListener('keydown', handleKeyDown as any);
+      return () => {
+        window.removeEventListener('keydown', handleKeyDown as any);
+      };
+    }
+  }, [selectedCertificate]);
 
   return (
     <>
@@ -187,35 +215,132 @@ export function CertificatesSection({ certificates }: CertificatesSectionProps) 
       </div>
     </section>
 
-    {/* Image Modal */}
-    {selectedCertificate && selectedCertificate.imageUrl && (
-      <Modal
-        isOpen={!!selectedCertificate}
-        onClose={handleCloseModal}
-        size="full"
-        showCloseButton={true}
-      >
-        <div className="relative w-full h-full min-h-[60vh] flex items-center justify-center bg-gray-50 dark:bg-dark-hover rounded-lg">
-          <div className="relative w-full max-w-5xl aspect-video">
-            <Image
-              src={selectedCertificate.imageUrl}
-              alt={selectedCertificate.title}
-              fill
-              className="object-contain rounded-lg"
-              priority
-            />
+    {/* Image Viewer with Zoom */}
+    <AnimatePresence>
+      {selectedCertificate && selectedCertificate.imageUrl && (
+        <>
+          {/* Overlay */}
+          <motion.div
+            className="fixed inset-0 bg-black/90 backdrop-blur-sm z-[100]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={handleCloseModal}
+          />
+
+          {/* Image Container */}
+          <div className="fixed inset-0 z-[101] flex items-center justify-center p-4">
+            <motion.div
+              className="relative w-full h-full flex items-center justify-center"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.2 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button
+                onClick={handleCloseModal}
+                className="absolute top-4 right-4 z-20 bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-full p-3 text-white transition-colors"
+                aria-label="Close"
+              >
+                <X className="w-6 h-6" />
+              </button>
+
+              {/* Transform Wrapper */}
+              <TransformWrapper
+                initialScale={1}
+                minScale={0.5}
+                maxScale={5}
+                centerOnInit={true}
+                limitToBounds={false}
+                centerZoomedOut={true}
+                wheel={{ step: 0.1, wheelDisabled: false }}
+                doubleClick={{ disabled: false, step: 0.7 }}
+                pan={{
+                  disabled: false,
+                  velocity: false,
+                  lockAxisX: false,
+                  lockAxisY: false,
+                }}
+                zoomIn={{ step: 0.3 }}
+                zoomOut={{ step: 0.3 }}
+                wrapperClass="w-full h-full"
+              >
+                {({ zoomIn, zoomOut, resetTransform }) => (
+                  <>
+                    {/* Zoom Controls */}
+                    <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
+                      <div className="flex flex-col gap-2 bg-white/10 backdrop-blur-sm rounded-lg p-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            zoomIn();
+                          }}
+                          className="bg-white/10 hover:bg-white/20 rounded-lg p-2 text-white transition-colors"
+                          aria-label="Zoom In"
+                        >
+                          <ZoomIn className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            zoomOut();
+                          }}
+                          className="bg-white/10 hover:bg-white/20 rounded-lg p-2 text-white transition-colors"
+                          aria-label="Zoom Out"
+                        >
+                          <ZoomOut className="w-5 h-5" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            resetTransform();
+                          }}
+                          className="bg-white/10 hover:bg-white/20 rounded-lg p-2 text-white transition-colors"
+                          aria-label="Reset"
+                        >
+                          <RotateCcw className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Image with Transform */}
+                    <TransformComponent
+                      wrapperClass="w-full h-full flex items-center justify-center"
+                      contentClass="w-full h-full flex items-center justify-center"
+                    >
+                      <div className="relative w-full h-full max-w-[90vw] max-h-[90vh] flex items-center justify-center">
+                        <Image
+                          src={selectedCertificate.imageUrl}
+                          alt={selectedCertificate.title}
+                          width={1200}
+                          height={800}
+                          className="max-w-full max-h-full object-contain select-none"
+                          priority
+                          unoptimized
+                          draggable={false}
+                        />
+                      </div>
+                    </TransformComponent>
+                  </>
+                )}
+              </TransformWrapper>
+
+              {/* Certificate Info */}
+              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/90 dark:bg-dark-elevated/90 backdrop-blur-sm rounded-lg px-6 py-3 shadow-lg z-20 pointer-events-none">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white text-center">
+                  {selectedCertificate.title}
+                </h3>
+                <p className="text-sm text-primary-600 dark:text-primary-400 text-center mt-1">
+                  {selectedCertificate.issuer}
+                </p>
+              </div>
+            </motion.div>
           </div>
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/90 dark:bg-dark-elevated/90 backdrop-blur-sm rounded-lg px-6 py-3 shadow-lg">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white text-center">
-              {selectedCertificate.title}
-            </h3>
-            <p className="text-sm text-primary-600 dark:text-primary-400 text-center mt-1">
-              {selectedCertificate.issuer}
-            </p>
-          </div>
-        </div>
-      </Modal>
-    )}
+        </>
+      )}
+    </AnimatePresence>
     </>
   );
 }
