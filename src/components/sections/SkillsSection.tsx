@@ -83,7 +83,7 @@ export function SkillsSection({ skills }: SkillsSectionProps) {
     <section id="skills" className="py-20 lg:py-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeader
-          number="02"
+          number="05"
           label="Skills"
           title="Technologies I work with"
           description="A curated stack for building modern, scalable mobile applications"

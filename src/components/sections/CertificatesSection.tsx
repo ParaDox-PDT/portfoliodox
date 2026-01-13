@@ -58,7 +58,7 @@ export function CertificatesSection({ certificates }: CertificatesSectionProps) 
     <section id="certificates" className="py-20 lg:py-32 bg-gray-50 dark:bg-dark-elevated">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeader
-          number="05"
+          number="04"
           label="Certificates"
           title="Professional credentials"
           description="Certifications that validate my expertise and commitment to continuous learning"

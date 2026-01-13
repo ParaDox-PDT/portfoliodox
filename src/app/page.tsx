@@ -169,10 +169,10 @@ export default function HomePage() {
       <main>
         <HeroSection profile={profile} />
         <AboutSection profile={profile} />
-        <SkillsSection skills={skills} />
         <ExperienceSection experience={experience} />
         <ProjectsSection projects={projects} />
         <CertificatesSection certificates={certificates} />
+        <SkillsSection skills={skills} />
         <ContactSection profile={profile} />
       </main>
 

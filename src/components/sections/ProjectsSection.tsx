@@ -56,7 +56,7 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
     <section id="projects" className="py-20 lg:py-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeader
-          number="04"
+          number="03"
           label="Projects"
           title="Featured work"
           description="A selection of projects that showcase my expertise and approach"
