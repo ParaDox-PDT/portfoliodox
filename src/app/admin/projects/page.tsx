@@ -7,7 +7,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { Plus, Pencil, Trash2, Loader2, ImageIcon, Star } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, ImageIcon, Star, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import {
   Button,
@@ -20,7 +20,7 @@ import {
   ImageUpload,
 } from '@/components/ui';
 import { getProjects, addProject, updateProject, deleteProject } from '@/lib/firestore';
-import { uploadProjectThumbnail } from '@/lib/storage';
+import { uploadProjectThumbnail, uploadProjectImage } from '@/lib/storage';
 import { generateSlug, validateProject } from '@/lib/utils';
 import type { Project, ProjectCategory } from '@/types';
 
@@ -122,6 +122,30 @@ export default function AdminProjectsPage() {
     return data || '';
   };
 
+  // Handle screenshot upload
+  const handleScreenshotUpload = async (file: File) => {
+    const projectId = editingItem?.id || `new-${Date.now()}`;
+    const currentImages = formData.images || [];
+    const index = currentImages.length;
+    const { data, error } = await uploadProjectImage(projectId, file, index);
+    if (error) throw new Error(error);
+    if (data) {
+      setFormData((prev) => ({
+        ...prev,
+        images: [...(prev.images || []), data],
+      }));
+    }
+    return data || '';
+  };
+
+  // Handle screenshot remove
+  const handleRemoveScreenshot = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      images: prev.images?.filter((_, i) => i !== index) || [],
+    }));
+  };
+
   // Handle tech tags
   const handleAddTech = () => {
     if (techInput.trim()) {
@@ -168,7 +192,12 @@ export default function AdminProjectsPage() {
   // Open modal for editing
   const handleEdit = (item: Project) => {
     setEditingItem(item);
-    setFormData(item);
+    setFormData({
+      ...item,
+      images: item.images || [], // Ensure images is always an array
+      technologies: item.technologies || [],
+      features: item.features || [],
+    });
     setIsModalOpen(true);
   };
 
@@ -186,12 +215,26 @@ export default function AdminProjectsPage() {
     setSaving(true);
 
     try {
+      // Ensure images array is properly formatted
+      const projectData: Partial<Project> = {
+        ...formData,
+        images: Array.isArray(formData.images) ? formData.images : [], // Ensure images is always an array
+        technologies: Array.isArray(formData.technologies) ? formData.technologies : [],
+        features: Array.isArray(formData.features) ? formData.features : [],
+      };
+
+      // Debug: Log the data being saved
+      console.log('Saving project data:', {
+        ...projectData,
+        imagesCount: projectData.images?.length || 0,
+      });
+
       if (editingItem?.id) {
-        const { error } = await updateProject(editingItem.id, formData);
+        const { error } = await updateProject(editingItem.id, projectData);
         if (error) throw new Error(error);
         toast.success('Project updated successfully!');
       } else {
-        const { error } = await addProject(formData as Omit<Project, 'id'>);
+        const { error } = await addProject(projectData as Omit<Project, 'id'>);
         if (error) throw new Error(error);
         toast.success('Project added successfully!');
       }
@@ -396,6 +439,75 @@ export default function AdminProjectsPage() {
             aspectRatio="video"
             hint="Recommended: 1200x800px"
           />
+
+          {/* Screenshots */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+              Screenshots
+            </label>
+            <div className="space-y-4">
+              {/* Existing Screenshots */}
+              {formData.images && formData.images.length > 0 && (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  {formData.images.map((image, index) => (
+                    <div key={index} className="relative group">
+                      <div className="relative aspect-video rounded-lg overflow-hidden bg-gray-100 dark:bg-dark-card border border-gray-200 dark:border-dark-border">
+                        <Image
+                          src={image}
+                          alt={`Screenshot ${index + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveScreenshot(index)}
+                          className="absolute top-2 right-2 p-1.5 rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Upload New Screenshot */}
+              <div className="relative">
+                <label className="relative block">
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        try {
+                          await handleScreenshotUpload(file);
+                          toast.success('Screenshot uploaded successfully!');
+                        } catch (err: any) {
+                          toast.error(err.message || 'Failed to upload screenshot');
+                        }
+                        // Reset input
+                        e.target.value = '';
+                      }
+                    }}
+                    className="hidden"
+                  />
+                  <div className="border-2 border-dashed border-gray-200 dark:border-dark-border rounded-lg p-6 text-center cursor-pointer hover:border-primary-400 dark:hover:border-primary-500 transition-colors bg-gray-50 dark:bg-dark-card">
+                    <ImageIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                      Add Screenshot
+                    </span>
+                    <span className="text-xs text-gray-400 dark:text-gray-500 block mt-1">
+                      Click to upload or drag and drop
+                    </span>
+                  </div>
+                </label>
+              </div>
+            </div>
+            <p className="mt-1.5 text-sm text-gray-500 dark:text-gray-400">
+              Upload multiple screenshots to showcase your project
+            </p>
+          </div>
 
           {/* Links */}
           <div className="grid sm:grid-cols-2 gap-5">

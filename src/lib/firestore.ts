@@ -440,12 +440,29 @@ export async function addProject(data: Omit<Project, 'id'>): Promise<FirebaseRes
       }
     }
     
-    const database = getDb();
-    const docRef = await addDoc(collection(database, COLLECTIONS.PROJECTS), {
+    // Ensure images is always an array
+    const projectData = {
       ...data,
+      images: Array.isArray(data.images) ? data.images : (data.images ? [data.images] : []),
       createdAt: serverTimestamp(),
+    };
+    
+    console.log('Adding project with data:', {
+      images: projectData.images,
+      imagesCount: projectData.images?.length || 0,
     });
-    return { data: { id: docRef.id, ...data }, error: null };
+    
+    const database = getDb();
+    const docRef = await addDoc(collection(database, COLLECTIONS.PROJECTS), projectData);
+    
+    const createdProject = { id: docRef.id, ...data, images: projectData.images };
+    console.log('Project added, created data:', {
+      id: createdProject.id,
+      images: createdProject.images,
+      imagesCount: createdProject.images?.length || 0,
+    });
+    
+    return { data: createdProject, error: null };
   } catch (error: any) {
     console.error('Error adding project:', error);
     return { data: null, error: error.message };
@@ -465,11 +482,29 @@ export async function updateProject(id: string, data: Partial<Project>): Promise
       }
     }
     
+    // Ensure images is always an array
+    const projectData = {
+      ...data,
+      images: Array.isArray(data.images) ? data.images : (data.images ? [data.images] : []),
+    };
+    
+    console.log('Updating project with data:', {
+      id,
+      images: projectData.images,
+      imagesCount: projectData.images?.length || 0,
+    });
+    
     const database = getDb();
     const docRef = doc(database, COLLECTIONS.PROJECTS, id);
-    await updateDoc(docRef, data);
+    await updateDoc(docRef, projectData);
     const updated = await getDoc(docRef);
     const convertedData = convertTimestamps({ id: updated.id, ...updated.data() });
+    
+    console.log('Project updated, retrieved data:', {
+      images: (convertedData as Project).images,
+      imagesCount: (convertedData as Project).images?.length || 0,
+    });
+    
     return { data: convertedData as Project, error: null };
   } catch (error: any) {
     console.error('Error updating project:', error);
