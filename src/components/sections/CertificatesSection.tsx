@@ -257,12 +257,6 @@ export function CertificatesSection({ certificates }: CertificatesSectionProps) 
                 centerZoomedOut={true}
                 wheel={{ step: 0.1, wheelDisabled: false }}
                 doubleClick={{ disabled: false, step: 0.7 }}
-                pan={{
-                  disabled: false,
-                  velocity: false,
-                  lockAxisX: false,
-                  lockAxisY: false,
-                }}
                 zoomIn={{ step: 0.3 }}
                 zoomOut={{ step: 0.3 }}
                 wrapperClass="w-full h-full"
