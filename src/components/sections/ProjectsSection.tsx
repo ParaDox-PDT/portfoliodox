@@ -152,7 +152,16 @@ export function ProjectsSection({ projects }: ProjectsSectionProps) {
 
                   {/* Actions */}
                   <div className="flex gap-3 mt-auto pt-4 border-t border-gray-100 dark:border-dark-border">
-                    <Link href={`/projects/${project.slug}`} className="flex-1">
+                    <Link 
+                      href={`/projects/${project.slug}`}
+                      onClick={() => {
+                        // Save scroll position before navigating
+                        if (typeof window !== 'undefined') {
+                          sessionStorage.setItem('homeScrollPosition', window.scrollY.toString());
+                        }
+                      }}
+                      className="flex-1"
+                    >
                       <Button
                         variant="ghost"
                         className="w-full"

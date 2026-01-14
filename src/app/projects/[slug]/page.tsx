@@ -4,8 +4,8 @@
 // PROJECT DETAIL PAGE (CLIENT-SIDE)
 // ===========================================
 
-import { useEffect, useState } from 'react';
-import { useParams, notFound } from 'next/navigation';
+import { useEffect, useState, useRef } from 'react';
+import { useParams, notFound, useRouter, usePathname } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, ExternalLink, Github, Download, Loader2, X, ZoomIn } from 'lucide-react';
@@ -22,12 +22,15 @@ import type { Profile, Project } from '@/types';
 
 export default function ProjectPage() {
   const params = useParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const slug = params?.slug as string;
   
   const [loading, setLoading] = useState(true);
   const [project, setProject] = useState<Project | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const scrollRestored = useRef(false);
 
   useEffect(() => {
     async function fetchData() {
@@ -50,6 +53,32 @@ export default function ProjectPage() {
 
     fetchData();
   }, [slug]);
+
+  // Save scroll position before leaving and scroll to top when entering
+  useEffect(() => {
+    // Save current scroll position when leaving home page
+    if (typeof window !== 'undefined') {
+      // Save scroll position when navigating to project detail
+      const handleBeforeRouteChange = () => {
+        if (window.location.pathname === '/') {
+          sessionStorage.setItem('homeScrollPosition', window.scrollY.toString());
+        }
+      };
+
+      // Scroll to top when entering project detail page
+      if (!loading && !scrollRestored.current && pathname?.startsWith('/projects/')) {
+        window.scrollTo(0, 0);
+        scrollRestored.current = true;
+      }
+
+      // Listen for navigation events
+      window.addEventListener('beforeunload', handleBeforeRouteChange);
+
+      return () => {
+        window.removeEventListener('beforeunload', handleBeforeRouteChange);
+      };
+    }
+  }, [loading, pathname]);
 
   // Handle keyboard navigation for lightbox
   useEffect(() => {
@@ -147,6 +176,12 @@ export default function ProjectPage() {
                 fill
                 className="object-cover"
                 priority
+                unoptimized
+                onError={(e) => {
+                  // Hide broken images
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                }}
               />
             </div>
           )}
@@ -236,6 +271,12 @@ export default function ProjectPage() {
                           alt={`${project.title} screenshot ${index + 1}`}
                           fill
                           className="object-cover transition-transform duration-300 group-hover:scale-105"
+                          unoptimized
+                          onError={(e) => {
+                            // Hide broken images
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                          }}
                         />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 flex items-center justify-center">
                           <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/90 dark:bg-dark-elevated/90 rounded-full p-2">
@@ -364,6 +405,20 @@ export default function ProjectPage() {
                     priority
                     unoptimized
                     draggable={false}
+                    onError={(e) => {
+                      // Show error message for broken images
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const parent = target.parentElement;
+                      if (parent) {
+                        parent.innerHTML = `
+                          <div class="text-white text-center p-8">
+                            <p class="text-lg mb-2">Image not found</p>
+                            <p class="text-sm opacity-75">This screenshot may have been removed</p>
+                          </div>
+                        `;
+                      }
+                    }}
                   />
                 </div>
 

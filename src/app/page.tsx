@@ -4,7 +4,8 @@
 // HOME PAGE (CLIENT-SIDE DATA FETCHING)
 // ===========================================
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { usePathname } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import {
@@ -38,12 +39,141 @@ import { Loader2 } from 'lucide-react';
 // ===========================================
 
 export default function HomePage() {
+  const pathname = usePathname();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [skills, setSkills] = useState<Skill[]>([]);
   const [experience, setExperience] = useState<Experience[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [certificates, setCertificates] = useState<Certificate[]>([]);
+  const scrollRestored = useRef(false);
+
+  // Save scroll position on scroll
+  useEffect(() => {
+    if (pathname !== '/') return;
+
+    let scrollTimeout: NodeJS.Timeout;
+    const handleScroll = () => {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        sessionStorage.setItem('homeScrollPosition', window.scrollY.toString());
+      }, 150); // Debounce scroll events
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(scrollTimeout);
+    };
+  }, [pathname]);
+
+  // Restore scroll position when navigating back to home page
+  useEffect(() => {
+    if (pathname !== '/' || loading) return;
+
+    const restoreScroll = () => {
+      const savedScrollPosition = sessionStorage.getItem('homeScrollPosition');
+      if (savedScrollPosition && !scrollRestored.current) {
+        const position = parseInt(savedScrollPosition, 10);
+        if (position > 0) {
+          // Try multiple times to ensure page is fully rendered
+          const tryRestore = (attempt: number = 0) => {
+            if (attempt > 5) {
+              scrollRestored.current = true;
+              return;
+            }
+
+            requestAnimationFrame(() => {
+              const currentScroll = window.scrollY;
+              // Only restore if we're at the top (meaning page just loaded)
+              if (currentScroll === 0 || attempt === 0) {
+                window.scrollTo({
+                  top: position,
+                  behavior: 'auto',
+                });
+                
+                // Verify scroll was successful
+                setTimeout(() => {
+                  if (Math.abs(window.scrollY - position) < 10) {
+                    scrollRestored.current = true;
+                  } else if (attempt < 5) {
+                    tryRestore(attempt + 1);
+                  } else {
+                    scrollRestored.current = true;
+                  }
+                }, 50);
+              } else {
+                scrollRestored.current = true;
+              }
+            });
+          };
+
+          tryRestore();
+        } else {
+          scrollRestored.current = true;
+        }
+      } else {
+        scrollRestored.current = true;
+      }
+    };
+
+    // Reset scrollRestored when pathname changes
+    if (pathname === '/') {
+      scrollRestored.current = false;
+      restoreScroll();
+    }
+  }, [pathname, loading]);
+
+  // Handle browser back/forward buttons with better timing
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      // Check if we're navigating to home page
+      if (window.location.pathname === '/') {
+        scrollRestored.current = false;
+        
+        // Wait for Next.js to update the route
+        setTimeout(() => {
+          const savedScrollPosition = sessionStorage.getItem('homeScrollPosition');
+          if (savedScrollPosition) {
+            const position = parseInt(savedScrollPosition, 10);
+            if (position > 0) {
+              // Try multiple times with increasing delays
+              const attempts = [50, 100, 200, 300, 500];
+              attempts.forEach((delay, index) => {
+                setTimeout(() => {
+                  if (!scrollRestored.current) {
+                    requestAnimationFrame(() => {
+                      window.scrollTo({
+                        top: position,
+                        behavior: 'auto',
+                      });
+                      
+                      // Check if scroll was successful
+                      setTimeout(() => {
+                        if (Math.abs(window.scrollY - position) < 10) {
+                          scrollRestored.current = true;
+                        } else if (index === attempts.length - 1) {
+                          scrollRestored.current = true;
+                        }
+                      }, 50);
+                    });
+                  }
+                }, delay);
+              });
+            } else {
+              scrollRestored.current = true;
+            }
+          } else {
+            scrollRestored.current = true;
+          }
+        }, 10);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
 
   useEffect(() => {
     async function fetchData() {
