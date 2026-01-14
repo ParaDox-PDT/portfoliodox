@@ -248,19 +248,17 @@ export function CertificatesSection({ certificates }: CertificatesSectionProps) 
               </button>
 
               {/* Transform Wrapper */}
-              <TransformWrapper
-                initialScale={1}
-                minScale={0.5}
-                maxScale={5}
-                centerOnInit={true}
-                limitToBounds={false}
-                centerZoomedOut={true}
-                wheel={{ step: 0.1, wheelDisabled: false }}
-                doubleClick={{ disabled: false, step: 0.7 }}
-                zoomIn={{ step: 0.3 }}
-                zoomOut={{ step: 0.3 }}
-                wrapperClass="w-full h-full"
-              >
+              <div className="w-full h-full">
+                <TransformWrapper
+                  initialScale={1}
+                  minScale={0.5}
+                  maxScale={5}
+                  centerOnInit={true}
+                  limitToBounds={false}
+                  centerZoomedOut={true}
+                  wheel={{ step: 0.1, wheelDisabled: false }}
+                  doubleClick={{ disabled: false, step: 0.7 }}
+                >
                 {({ zoomIn, zoomOut, resetTransform }) => (
                   <>
                     {/* Zoom Controls */}
@@ -306,7 +304,7 @@ export function CertificatesSection({ certificates }: CertificatesSectionProps) 
                     >
                       <div className="relative w-full h-full max-w-[90vw] max-h-[90vh] flex items-center justify-center">
                         <Image
-                          src={selectedCertificate.imageUrl}
+                          src={selectedCertificate.imageUrl!}
                           alt={selectedCertificate.title}
                           width={1200}
                           height={800}
@@ -320,6 +318,7 @@ export function CertificatesSection({ certificates }: CertificatesSectionProps) 
                   </>
                 )}
               </TransformWrapper>
+              </div>
 
               {/* Certificate Info */}
               <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/90 dark:bg-dark-elevated/90 backdrop-blur-sm rounded-lg px-6 py-3 shadow-lg z-20 pointer-events-none">
