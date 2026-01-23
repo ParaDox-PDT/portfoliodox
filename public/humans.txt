@@ -1,0 +1,26 @@
+/* TEAM */
+Developer: Doniyor Jo'rabekov (ParaDox)
+Contact: paradox.pdt@gmail.com
+GitHub: github.com/ParaDox-PDT
+LinkedIn: linkedin.com/in/paradox-pdt
+Telegram: t.me/ParaDox_PDT
+Location: Tashkent, Uzbekistan
+
+/* ALSO KNOWN AS */
+ParaDox
+ParaDox-PDT
+ParaDox PDT
+ParaDox358
+Jo'rabekov Doniyor
+Doniyor Jorabekov
+
+/* SITE */
+Last update: 2024
+Standards: HTML5, CSS3, ES6+
+Framework: Next.js 14
+UI Framework: Tailwind CSS
+Language: TypeScript
+
+/* TECHNOLOGIES */
+Flutter, Dart, React, Next.js, Firebase,
+Clean Architecture, BLoC Pattern, REST APIs

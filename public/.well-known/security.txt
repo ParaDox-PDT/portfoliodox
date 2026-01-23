@@ -1,0 +1,8 @@
+# Security Policy for ParaDox Portfolio
+# Contact: Doniyor Jo'rabekov (ParaDox)
+
+Contact: mailto:paradox.pdt@gmail.com
+Contact: https://t.me/ParaDox_PDT
+Preferred-Languages: en, uz, ru
+
+# If you find a security issue, please report it responsibly.
