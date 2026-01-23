@@ -6,7 +6,7 @@
 
 export const siteConfig = {
   // Asosiy URL
-  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://paradox-portfolio.vercel.app',
+  url: process.env.NEXT_PUBLIC_SITE_URL || 'https://portfoliodox.uz',
   
   // Sahifa nomi
   siteName: 'ParaDox Portfolio',
