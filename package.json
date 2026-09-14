@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postbuild": "node scripts/normalize-next-paths.cjs"
   },
   "dependencies": {
     "clsx": "^2.1.0",

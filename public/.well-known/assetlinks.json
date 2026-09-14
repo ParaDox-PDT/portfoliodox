@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "uz.autodoc.nfcpay",
+      "sha256_cert_fingerprints": [
+        "65:33:3D:EB:46:09:3F:CB:34:C2:31:E3:C4:C0:61:96:75:DC:34:BA:B2:CF:EB:97:AE:56:EB:22:39:61:C2:42"
+      ]
+    }
+  }
+]

@@ -1,0 +1,19 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "RP6X93784T.uz.autodoc.nfcpay",
+        "paths": [
+          "/nfc/*"
+        ],
+        "components": [
+          {
+            "/": "/nfc/*",
+            "comment": "Matches merchant UUID payment deep links"
+          }
+        ]
+      }
+    ]
+  }
+}
