@@ -40,7 +40,7 @@ export function ProjectsSection({
       <div className="work-heading">
         <div>
           <p className="eyebrow">
-            {allProjects ? "The project archive" : "01 / Selected work"}
+            {allProjects ? "The project archive" : "05 / Selected work"}
           </p>
           <h2>
             {allProjects ? (

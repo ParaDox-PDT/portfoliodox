@@ -328,7 +328,7 @@ export function ExperienceSection({
   return (
     <section id="experience" className="experience-section portfolio-container">
       <div className="experience-heading">
-        <p className="eyebrow">03 / Experience</p>
+        <p className="eyebrow">02 / Experience</p>
         <h2>
           Built through
           <br />
