@@ -49,7 +49,7 @@ export function CertificatesSection({ certificates }: CertificatesSectionProps) 
       <section id="certificates" className="py-24 border-t border-[#27272a] bg-[#111113]">
         <div className="portfolio-container">
           <div className="mb-12">
-            <p className="eyebrow">04 / Credentials</p>
+            <p className="eyebrow">03 / Credentials</p>
             <h2 className="text-3xl md:text-5xl font-medium tracking-tight text-white">
               Verified <span>knowledge.</span>
             </h2>

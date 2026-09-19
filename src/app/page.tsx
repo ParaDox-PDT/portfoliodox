@@ -256,11 +256,11 @@ export default function HomePage() {
       
       <main id="main-content" className="portfolio-main">
         {profile && <HeroSection profile={profile} />}
-        {profile && <AboutSection profile={profile} />}
         <ExperienceSection experience={experience} />
-        <SkillsSection skills={skills} />
-        <CertificatesSection certificates={certificates} />
         <ProjectsSection projects={projects} />
+        <CertificatesSection certificates={certificates} />
+        <SkillsSection skills={skills} />
+        {profile && <AboutSection profile={profile} />}
         {profile && <ContactSection profile={profile} />}
       </main>
 

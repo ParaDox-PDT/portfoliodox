@@ -17,7 +17,7 @@ export function SkillsSection({ skills }: { skills: Skill[] }) {
   const groups = groupBy(skills, (skill) => skill.category);
   return (
     <section id="skills" className="skills-section portfolio-container">
-      <p className="eyebrow">03 / The toolkit</p>
+      <p className="eyebrow">04 / The toolkit</p>
       <h2>
         The right tools.
         <br />

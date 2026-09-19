@@ -6,7 +6,7 @@ export function AboutSection({ profile }: { profile?: Profile | null }) {
     <section id="about" className="about-section">
       <div className="portfolio-container about-layout">
         <div>
-          <p className="eyebrow">01 / Behind the code</p>
+          <p className="eyebrow">05 / Behind the code</p>
           <h2>
             A developer.
             <br />A problem solver.

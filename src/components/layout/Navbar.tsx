@@ -5,11 +5,11 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, X, ArrowUpRight } from "lucide-react";
 const navItems = [
-  { label: "About", href: "/#about" },
   { label: "Experience", href: "/#experience" },
-  { label: "Skills", href: "/#skills" },
-  { label: "Certificates", href: "/#certificates" },
   { label: "Projects", href: "/#projects" },
+  { label: "Certificates", href: "/#certificates" },
+  { label: "Skills", href: "/#skills" },
+  { label: "About", href: "/#about" },
 ];
 export function Navbar({ name }: { name?: string }) {
   const [open, setOpen] = useState(false);
