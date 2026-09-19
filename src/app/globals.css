@@ -7,19 +7,13 @@
    =========================================== */
 
 /* Import Outfit font */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
 /* Import JetBrains Mono for code */
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 /* ===========================================
    BASE STYLES
    =========================================== */
 
-:root {
-  --font-outfit: 'Outfit', sans-serif;
-  --font-jetbrains: 'JetBrains Mono', monospace;
-}
 
 html {
   scroll-behavior: smooth;

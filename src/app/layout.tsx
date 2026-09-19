@@ -5,6 +5,12 @@
 import type { Metadata, Viewport } from 'next';
 import { Toaster } from 'react-hot-toast';
 import './globals.css';
+import './portfolio.css';
+import { Outfit, JetBrains_Mono } from 'next/font/google';
+import { PortfolioMotion } from '@/components/PortfolioMotion';
+
+const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit', display: 'swap' });
+const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-jetbrains', display: 'swap' });
 
 // SEO Components
 import { JsonLd, FaqJsonLd } from '@/components/seo/JsonLd';
@@ -145,7 +151,6 @@ export const viewport: Viewport = {
 // LAYOUT COMPONENT
 // ===========================================
 
-import { IntroLoader } from '@/components/IntroLoader';
 
 export default function RootLayout({
   children,
@@ -153,7 +158,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className="dark">
+    <html lang="en" suppressHydrationWarning className={`dark ${outfit.variable} ${mono.variable}`}>
       <head>
         {/* JSON-LD Structured Data for SEO and AI */}
         <JsonLd type="full" />
@@ -173,9 +178,7 @@ export default function RootLayout({
         <link rel="me" href="https://t.me/ParaDox_PDT" />
       </head>
       <body className="antialiased">
-        {/* Intro Loader - Client Component */}
-        <IntroLoader />
-        {children}
+        <PortfolioMotion>{children}</PortfolioMotion>
         <Toaster
           position="bottom-right"
           toastOptions={{

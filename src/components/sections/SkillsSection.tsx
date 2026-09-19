@@ -1,146 +1,72 @@
-'use client';
-
-// ===========================================
-// SKILLS SECTION COMPONENT
-// ===========================================
-
-import { motion } from 'framer-motion';
-import { Smartphone, Layers, Server, Wrench } from 'lucide-react';
-import { SectionHeader } from '@/components/ui/SectionHeader';
-import { Card, Badge } from '@/components/ui';
-import { groupBy, capitalize } from '@/lib/utils';
-import type { Skill, SkillCategory } from '@/types';
-
-// ===========================================
-// TYPES
-// ===========================================
-
-interface SkillsSectionProps {
-  skills: Skill[];
-}
-
-// ===========================================
-// CATEGORY ICONS
-// ===========================================
-
-const categoryIcons: Record<SkillCategory, typeof Smartphone> = {
-  mobile: Smartphone,
-  architecture: Layers,
-  backend: Server,
-  tools: Wrench,
-  other: Wrench,
+"use client";
+import { Smartphone, Layers, Server, Wrench } from "lucide-react";
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
+import { groupBy } from "@/lib/utils";
+import type { Skill, SkillCategory } from "@/types";
+const categories: Record<
+  SkillCategory,
+  { label: string; Icon: typeof Smartphone; color: string }
+> = {
+  mobile: { label: "Mobile development", Icon: Smartphone, color: "rgba(6, 182, 212, 0.4)" },
+  architecture: { label: "Architecture", Icon: Layers, color: "rgba(168, 85, 247, 0.4)" },
+  backend: { label: "Backend & services", Icon: Server, color: "rgba(6, 182, 212, 0.4)" },
+  tools: { label: "Tools & workflow", Icon: Wrench, color: "rgba(168, 85, 247, 0.4)" },
+  other: { label: "Other skills", Icon: Wrench, color: "rgba(6, 182, 212, 0.4)" },
 };
-
-const categoryLabels: Record<SkillCategory, string> = {
-  mobile: 'Mobile Development',
-  architecture: 'Architecture & Patterns',
-  backend: 'Backend & Services',
-  tools: 'Tools & DevOps',
-  other: 'Other Skills',
-};
-
-const levelColors: Record<string, string> = {
-  expert: 'primary',
-  advanced: 'secondary',
-  intermediate: 'warning',
-  beginner: 'default',
-};
-
-// ===========================================
-// ANIMATION VARIANTS
-// ===========================================
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-    },
-  },
-};
-
-// ===========================================
-// COMPONENT
-// ===========================================
-
-export function SkillsSection({ skills }: SkillsSectionProps) {
-  const groupedSkills = groupBy(skills, (skill) => skill.category);
-  const categories = Object.keys(groupedSkills) as SkillCategory[];
-
+export function SkillsSection({ skills }: { skills: Skill[] }) {
+  const groups = groupBy(skills, (skill) => skill.category);
   return (
-    <section id="skills" className="py-20 lg:py-32">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SectionHeader
-          number="05"
-          label="Skills"
-          title="Technologies I work with"
-          description="A curated stack for building modern, scalable mobile applications"
-        />
-
-        <motion.div
-          className="grid md:grid-cols-2 gap-6"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: '-100px' }}
-        >
-          {categories.map((category) => {
-            const Icon = categoryIcons[category] || Wrench;
-            const categorySkills = groupedSkills[category];
-
-            return (
-              <motion.div key={category} variants={itemVariants}>
-                <Card hover className="h-full">
-                  {/* Category Header */}
-                  <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100 dark:border-dark-border">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-500 to-secondary-500 flex items-center justify-center text-white">
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white">
-                      {categoryLabels[category]}
-                    </h3>
+    <section id="skills" className="skills-section portfolio-container">
+      <p className="eyebrow">04 / The toolkit</p>
+      <h2>
+        The right tools.
+        <br />
+        <span>Thoughtfully applied.</span>
+      </h2>
+      <p className="section-description">
+        A focused stack for reliable, scalable mobile products.
+      </p>
+      <div className="skills-grid">
+        {Object.entries(groups).map(([category, items]) => {
+          const { label, Icon, color } =
+            categories[category as SkillCategory] || categories.other;
+          return (
+            <SpotlightCard
+              key={category}
+              className="p-6 md:p-7 flex flex-col justify-between"
+              borderSpotlightColor={color}
+            >
+              <div>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900/80 text-cyan-400">
+                    <Icon size={20} strokeWidth={1.75} />
                   </div>
-
-                  {/* Skills List */}
-                  <div className="space-y-3">
-                    {categorySkills.map((skill) => (
-                      <div
-                        key={skill.id}
-                        className="flex items-center justify-between p-3 bg-gray-50 dark:bg-dark-hover rounded-lg"
-                      >
-                        <span className="font-medium text-gray-700 dark:text-gray-300">
-                          {skill.name}
-                        </span>
-                        <Badge
-                          variant={levelColors[skill.level] as any || 'default'}
-                          size="sm"
-                        >
-                          {capitalize(skill.level)}
-                        </Badge>
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-              </motion.div>
-            );
-          })}
-        </motion.div>
+                  <h3 className="text-base font-semibold tracking-tight text-zinc-100">
+                    {label}
+                  </h3>
+                </div>
+                <div className="skill-tags mt-6">
+                  {items.map((skill) => (
+                    <span
+                      key={skill.id || skill.name}
+                      title={`${skill.name} • ${skill.level}`}
+                      className="group/tag relative inline-flex items-center gap-1.5 rounded-md border border-zinc-850 bg-zinc-900/60 px-2.5 py-1 text-xs text-zinc-300 transition-all duration-200 hover:border-cyan-500/40 hover:bg-cyan-950/20 hover:text-cyan-200 cursor-default"
+                    >
+                      <span>{skill.name}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </SpotlightCard>
+          );
+        })}
       </div>
+      {!skills.length && (
+        <p className="portfolio-empty">
+          Skills will be listed here as they become available.
+        </p>
+      )}
     </section>
   );
 }
-
 export default SkillsSection;
-

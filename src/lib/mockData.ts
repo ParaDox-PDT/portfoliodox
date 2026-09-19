@@ -5,23 +5,29 @@
 import type { Profile, Skill, Experience, Project, Certificate } from '@/types';
 
 export const mockProfile: Profile = {
-  id: 'mock-profile',
-  name: 'John Doe',
+  id: 'main',
+  name: "Doniyor Jo'rabekov",
   title: 'Flutter Developer',
-  subtitle: '3 year experience',
-  email: 'hello@example.com',
-  phone: '+1 234 567 890',
+  subtitle: 'Cross-platform apps with clean architecture',
+  email: 'doniyorjorabekov@gmail.com',
+  phone: '+998990762259',
   location: 'Tashkent, Uzbekistan',
-  bio: `Over the past 3+ years, I've had the privilege of working with startups and established companies to build production-grade mobile applications used by thousands of users daily.
+  bio: `I’m a Flutter Developer with over 3 years of hands-on experience building cross-platform mobile applications from scratch — from UI/UX design to architecture and backend integration.
 
-My approach combines technical excellence with a deep understanding of user needs. I believe that great apps aren't just about clean code—they're about solving real problems and delivering genuine value.`,
-  summary: '3+ years crafting high-performance mobile applications for startups and enterprises worldwide. Specializing in clean architecture, beautiful UIs, and seamless user experiences.',
-  avatarUrl: '',
-  resumeUrl: '',
-  github: 'https://github.com',
-  linkedin: 'https://linkedin.com',
-  telegram: 'https://t.me',
-  hhuz: 'https://hh.uz',
+I’m currently working at FixiTruck, a US-based trucking platform, where I develop a production Flutter app used by real truck drivers. My work includes authentication (Phone OTP, Google, Apple), truck management, multi-step breakdown reporting, AI-powered diagnostics, real-time chat, and map-based navigation with clustering and filters.
+
+Previously, I worked on healthcare, ERP, public service, and gaming projects, building scalable apps, reusable UI kits, and complex business logic. I have strong experience with Clean Architecture, BLoC, Dio, GetIt, Hive, Firebase (Analytics, Crashlytics, FCM), and third-party integrations like Yandex Maps.
+
+I value clean, testable code, clear architecture, and continuous improvement. I’m comfortable working in Agile teams, collaborating with backend developers and designers, and delivering stable, user-focused mobile solutions.`,
+  summary: `Flutter Developer with 3 years of experience building production-ready mobile applications.
+I specialize in Clean Architecture, scalable state management, and real-time features.
+I’ve worked on apps in logistics, healthcare, public services, and gaming — focusing on performance, clean code, and great user experience.`,
+  avatarUrl: 'https://firebasestorage.googleapis.com/v0/b/my-portfolio-cbaae.firebasestorage.app/o/profile%2Favatar-1776748881162.jpg?alt=media&token=e8fadec4-a742-4fab-94f2-4c7c8148f63b',
+  resumeUrl: 'https://firebasestorage.googleapis.com/v0/b/my-portfolio-cbaae.firebasestorage.app/o/profile%2Fresume.pdf?alt=media&token=bd6155ac-dc95-4411-a93a-3bc1f117117c',
+  github: 'https://github.com/ParaDox-PDT',
+  linkedin: 'https://www.linkedin.com/in/doniyor-jo-rabekov-b9aa40250/',
+  telegram: 'https://t.me/paradox358',
+  hhuz: 'https://tashkent.hh.uz/resume/28edccabff0d9416460039ed1f79514d376a38',
   website: '',
   yearsExperience: 3,
   projectsCompleted: 15,

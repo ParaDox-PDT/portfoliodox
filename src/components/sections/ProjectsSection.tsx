@@ -1,216 +1,196 @@
-'use client';
-
-// ===========================================
-// PROJECTS SECTION COMPONENT
-// ===========================================
-
-import { motion } from 'framer-motion';
-import Image from 'next/image';
-import Link from 'next/link';
-import { ExternalLink, Github, ArrowRight, ImageIcon } from 'lucide-react';
-import { SectionHeader } from '@/components/ui/SectionHeader';
-import { Card, Badge, Button } from '@/components/ui';
-import type { Project } from '@/types';
-
-// ===========================================
-// TYPES
-// ===========================================
-
-interface ProjectsSectionProps {
+"use client";
+import { useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowUpRight, Github, Smartphone, Globe, Code2 } from "lucide-react";
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
+import type { Project } from "@/types";
+export function ProjectsSection({
+  projects,
+  allProjects = false,
+}: {
   projects: Project[];
-}
-
-// ===========================================
-// ANIMATION VARIANTS
-// ===========================================
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-    },
-  },
-};
-
-// ===========================================
-// COMPONENT
-// ===========================================
-
-export function ProjectsSection({ projects }: ProjectsSectionProps) {
-  const featuredProjects = projects.filter((p) => p.isFeatured).slice(0, 4);
-
+  allProjects?: boolean;
+}) {
+  const [filter, setFilter] = useState("all");
+  const reduce = useReducedMotion();
+  const featured =
+    !allProjects && projects.some((project) => project.isFeatured)
+      ? projects.filter((project) => project.isFeatured)
+      : projects;
+  const filtered = featured.filter(
+    (project) => filter === "all" || project.category === filter,
+  );
+  const shown = allProjects ? filtered : filtered.slice(0, 4);
+  const categories = [
+    { value: "all", label: "All work" },
+    { value: "mobile-app", label: "Mobile" },
+    { value: "web-app", label: "Web" },
+    { value: "open-source", label: "Open source" },
+    { value: "package", label: "Packages" },
+    { value: "other", label: "Other" },
+  ].filter(
+    (category) =>
+      category.value === "all" ||
+      featured.some((project) => project.category === category.value),
+  );
   return (
-    <section id="projects" className="py-20 lg:py-32">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SectionHeader
-          number="03"
-          label="Projects"
-          title="Featured work"
-          description="A selection of projects that showcase my expertise and approach"
-        />
-
-        <motion.div
-          className="grid md:grid-cols-2 gap-8"
-          variants={containerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: '-100px' }}
+    <section id="projects" className="work-section portfolio-container">
+      <div className="work-heading">
+        <div>
+          <p className="eyebrow">
+            {allProjects ? "The project archive" : "01 / Selected work"}
+          </p>
+          <h2>
+            {allProjects ? (
+              <>
+                All the <span>work.</span>
+              </>
+            ) : (
+              <>
+                Ideas made <span>real.</span>
+              </>
+            )}
+          </h2>
+          <p className="section-description">
+            A closer look at what I’ve been building.
+          </p>
+        </div>
+        <Link
+          className="portfolio-text-link"
+          href={allProjects ? "/" : "/projects"}
         >
-          {featuredProjects.map((project) => (
-            <motion.article
-              key={project.id}
-              variants={itemVariants}
+          {allProjects ? "Back home" : "All projects"}{" "}
+          <ArrowUpRight size={18} />
+        </Link>
+      </div>
+      <div
+        className="work-filters relative"
+        role="group"
+        aria-label="Filter selected projects"
+      >
+        {categories.map((category) => {
+          const isActive = filter === category.value;
+          return (
+            <button
+              key={category.value}
+              onClick={() => setFilter(category.value)}
+              aria-pressed={isActive}
+              className="relative rounded-lg px-4 py-2 text-xs font-medium transition-colors"
             >
-              <Card
-                hover
-                padding="none"
-                className="overflow-hidden group h-full flex flex-col"
-              >
-                {/* Image */}
-                <div className="relative aspect-video bg-gray-100 dark:bg-dark-hover overflow-hidden">
+              {isActive && (
+                <motion.div
+                  layoutId="activeCategoryPill"
+                  className="absolute inset-0 rounded-lg border border-cyan-500/40 bg-cyan-950/40 shadow-[0_0_15px_rgba(6,182,212,0.15)]"
+                  transition={reduce ? { duration: 0 } : { type: "spring", stiffness: 380, damping: 30 }}
+                />
+              )}
+              <span className={`relative z-10 flex items-center gap-2 ${isActive ? "text-cyan-300" : "text-zinc-400 hover:text-zinc-200"}`}>
+                {category.label}
+                {category.value === "all" && (
+                  <span className="text-[10px] opacity-70">
+                    {featured.length.toString().padStart(2, "0")}
+                  </span>
+                )}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+      <div className="work-grid" aria-live="polite">
+        {shown.map((project, index) => {
+          const Icon =
+            project.category === "mobile-app"
+              ? Smartphone
+              : project.category === "web-app"
+                ? Globe
+                : Code2;
+          return (
+            <motion.article
+              className="work-card group"
+              key={project.id || project.slug}
+              initial={reduce ? false : { opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.1 }}
+              transition={{ duration: 0.45, delay: (index % 2) * 0.08 }}
+            >
+              <SpotlightCard className="flex h-full flex-col p-5 md:p-6">
+                <Link
+                  href={`/projects/${project.slug}`}
+                  className="work-image group/img relative"
+                  aria-label={`View ${project.title}`}
+                >
                   {project.thumbnailUrl ? (
                     <Image
                       src={project.thumbnailUrl}
                       alt={project.title}
                       fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      sizes="(max-width: 767px) 100vw, 50vw"
+                      className="object-cover transition-transform duration-500 group-hover/img:scale-105"
                     />
                   ) : (
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <ImageIcon className="w-12 h-12 text-gray-300 dark:text-gray-600" />
+                    <div className="work-placeholder">
+                      <Icon size={58} strokeWidth={1} />
+                      <span>{project.title}</span>
+                      <small>Project preview unavailable</small>
                     </div>
                   )}
-
-                  {/* Overlay with Links */}
-                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-4">
-                    {project.liveUrl && (
-                      <a
-                        href={project.liveUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-3 bg-white rounded-full text-gray-900 hover:bg-primary-500 hover:text-white transition-colors"
-                      >
-                        <ExternalLink className="w-5 h-5" />
-                      </a>
-                    )}
-                    {project.githubUrl && (
-                      <a
-                        href={project.githubUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-3 bg-white rounded-full text-gray-900 hover:bg-primary-500 hover:text-white transition-colors"
-                      >
-                        <Github className="w-5 h-5" />
-                      </a>
-                    )}
-                  </div>
+                  <span className="work-open" aria-hidden="true">
+                    <ArrowUpRight size={22} />
+                  </span>
+                </Link>
+                <div className="work-meta">
+                  <span>{project.category.replaceAll("-", " ")}</span>
+                  <span>{String(index + 1).padStart(2, "0")}</span>
                 </div>
-
-                {/* Content */}
-                <div className="p-6 flex-1 flex flex-col">
-                  {/* Category */}
-                  <Badge variant="primary" size="sm" className="self-start mb-3">
-                    {project.category.replace('-', ' ')}
-                  </Badge>
-
-                  {/* Title */}
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    {project.title}
-                  </h3>
-
-                  {/* Description */}
-                  <p className="text-gray-600 dark:text-gray-400 mb-4 flex-1">
-                    {project.shortDescription}
-                  </p>
-
-                  {/* Technologies */}
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {project.technologies.slice(0, 4).map((tech) => (
-                      <Badge key={tech} variant="default" size="sm">
-                        {tech}
-                      </Badge>
-                    ))}
-                    {project.technologies.length > 4 && (
-                      <Badge variant="default" size="sm">
-                        +{project.technologies.length - 4}
-                      </Badge>
-                    )}
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-3 mt-auto pt-4 border-t border-gray-100 dark:border-dark-border">
-                    <Link 
-                      href={`/projects/${project.slug}`}
-                      onClick={() => {
-                        // Save scroll position before navigating
-                        if (typeof window !== 'undefined') {
-                          sessionStorage.setItem('homeScrollPosition', window.scrollY.toString());
-                        }
-                      }}
-                      className="flex-1"
-                    >
-                      <Button
-                        variant="ghost"
-                        className="w-full"
-                        rightIcon={<ArrowRight className="w-4 h-4" />}
-                      >
-                        View Details
-                      </Button>
+                <div className="work-title">
+                  <h3>
+                    <Link href={`/projects/${project.slug}`}>
+                      {project.title}
                     </Link>
-                    {project.githubUrl && (
-                      <a
-                        href={project.githubUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <Button variant="ghost" size="icon">
-                          <Github className="w-5 h-5" />
-                        </Button>
-                      </a>
-                    )}
-                  </div>
+                  </h3>
+                  {project.githubUrl && (
+                    <a
+                      href={project.githubUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${project.title} source code`}
+                    >
+                      <Github size={19} />
+                    </a>
+                  )}
                 </div>
-              </Card>
+                <p>{project.shortDescription}</p>
+                <div className="work-technologies mt-auto pt-4">
+                  {project.technologies.slice(0, 4).map((tech) => (
+                    <span key={tech}>{tech}</span>
+                  ))}
+                  {project.liveUrl && (
+                    <a
+                      href={project.liveUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Live project <ArrowUpRight size={14} />
+                    </a>
+                  )}
+                </div>
+              </SpotlightCard>
             </motion.article>
-          ))}
-        </motion.div>
-
-        {/* View All Button */}
-        {projects.length > 4 && (
-          <motion.div
-            className="text-center mt-12"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-          >
-            <Link href="/projects">
-              <Button
-                variant="outline"
-                size="lg"
-                rightIcon={<ArrowRight className="w-4 h-4" />}
-              >
-                View All Projects
-              </Button>
-            </Link>
-          </motion.div>
-        )}
+          );
+        })}
       </div>
+      {shown.length === 0 && (
+        <div className="portfolio-empty">
+          <Code2 size={28} />
+          <p>New work is on the way.</p>
+          <Link href="/#contact">
+            Let’s discuss your next project <ArrowUpRight size={16} />
+          </Link>
+        </div>
+      )}
     </section>
   );
 }
-
 export default ProjectsSection;
-

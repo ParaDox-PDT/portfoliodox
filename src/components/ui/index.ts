@@ -26,3 +26,8 @@ export type { ModalProps } from './Modal';
 export { ImageUpload } from './ImageUpload';
 export type { ImageUploadProps } from './ImageUpload';
 
+export { SpotlightCard } from './SpotlightCard';
+export { StatusBadge } from './StatusBadge';
+export { MagneticButton } from './magnetic-button';
+export { GridPattern } from './grid-pattern';
+

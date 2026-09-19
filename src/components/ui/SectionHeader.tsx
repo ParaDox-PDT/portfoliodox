@@ -57,13 +57,13 @@ export function SectionHeader({
   title,
   titleHighlight,
   description,
-  centered = true,
+  centered = false,
   className,
 }: SectionHeaderProps) {
   return (
     <motion.div
       className={cn(
-        'mb-12 md:mb-16',
+        'portfolio-section-header mb-12 md:mb-16',
         centered && 'text-center',
         className
       )}

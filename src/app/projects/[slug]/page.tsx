@@ -121,13 +121,13 @@ export default function ProjectPage() {
     return (
       <>
         <Navbar />
-        <main className="pt-24 pb-20">
+        <main id="main-content" className="pt-24 pb-20">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
               Project Not Found
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mb-8">
-              The project you're looking for doesn't exist.
+              The project you’re looking for doesn’t exist.
             </p>
             <Link href="/#projects">
               <Button>Back to Projects</Button>
@@ -143,7 +143,7 @@ export default function ProjectPage() {
     <>
       <Navbar />
 
-      <main className="pt-24 pb-20">
+      <main id="main-content" className="pt-24 pb-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Back Link */}
           <Link
@@ -313,7 +313,7 @@ export default function ProjectPage() {
                     Interested in working together?
                   </h3>
                   <p className="text-white/80 text-sm mb-4">
-                    Let's discuss how I can help bring your ideas to life.
+                    Let’s discuss how I can help bring your ideas to life.
                   </p>
                   <Link href="/#contact">
                     <Button

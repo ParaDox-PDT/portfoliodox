@@ -25,16 +25,20 @@ const firebaseConfig = {
  * Returns validation result instead of throwing error
  */
 function validateFirebaseConfig(): { isValid: boolean; missing: string[] } {
-  const required = [
-    'NEXT_PUBLIC_FIREBASE_API_KEY',
-    'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN',
-    'NEXT_PUBLIC_FIREBASE_PROJECT_ID',
-    'NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET',
-    'NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID',
-    'NEXT_PUBLIC_FIREBASE_APP_ID',
-  ];
+  // Next.js only inlines statically referenced NEXT_PUBLIC_* variables.
+  // Validate the resolved configuration rather than dynamic process.env[key].
+  const required = {
+    NEXT_PUBLIC_FIREBASE_API_KEY: firebaseConfig.apiKey,
+    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: firebaseConfig.authDomain,
+    NEXT_PUBLIC_FIREBASE_PROJECT_ID: firebaseConfig.projectId,
+    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: firebaseConfig.storageBucket,
+    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: firebaseConfig.messagingSenderId,
+    NEXT_PUBLIC_FIREBASE_APP_ID: firebaseConfig.appId,
+  };
 
-  const missing = required.filter(key => !process.env[key]);
+  const missing = Object.entries(required)
+    .filter(([, value]) => !value)
+    .map(([key]) => key);
   
   if (missing.length > 0 && typeof window !== 'undefined') {
     console.warn(

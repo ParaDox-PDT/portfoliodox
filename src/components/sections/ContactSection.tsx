@@ -1,252 +1,201 @@
-'use client';
+"use client";
 
-// ===========================================
-// CONTACT SECTION COMPONENT
-// ===========================================
+import { useState } from "react";
+import {
+  ArrowUpRight,
+  Github,
+  Linkedin,
+  Send,
+  Globe,
+  Briefcase,
+  Download,
+  Copy,
+  Check,
+  Mail,
+  MapPin,
+  Sparkles,
+} from "lucide-react";
+import toast from "react-hot-toast";
+import { MagneticButton } from "@/components/ui/magnetic-button";
+import { SpotlightCard } from "@/components/ui/SpotlightCard";
+import { personData } from "@/lib/seo.config";
+import type { Profile } from "@/types";
 
-import { motion } from 'framer-motion';
-import { Mail, MapPin, Github, Linkedin, Send, Globe, Briefcase } from 'lucide-react';
-import { SectionHeader } from '@/components/ui/SectionHeader';
-import { Card, Button, Input, Textarea, Select } from '@/components/ui';
-import type { Profile } from '@/types';
+export function ContactSection({ profile }: { profile?: Profile | null }) {
+  const [copied, setCopied] = useState(false);
+  const email = profile?.email || personData.email;
 
-// ===========================================
-// CUSTOM ICONS
-// ===========================================
+  const handleCopyEmail = async () => {
+    try {
+      await navigator.clipboard.writeText(email);
+      setCopied(true);
+      toast.success("Email copied to clipboard!", {
+        style: {
+          background: "#161618",
+          color: "#f9fafb",
+          border: "1px solid #22d3ee",
+          borderRadius: "10px",
+        },
+        iconTheme: {
+          primary: "#06b6d4",
+          secondary: "#0a0a0b",
+        },
+      });
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      toast.error("Failed to copy email");
+    }
+  };
 
-const TelegramIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-    <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
-  </svg>
-);
-
-const HHIcon = () => (
-  <svg viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
-    <path d="M12.16 0C5.764 0 .6 5.164.6 11.56v.88C.6 18.836 5.764 24 12.16 24c6.396 0 11.56-5.164 11.56-11.56v-.88C23.72 5.164 18.556 0 12.16 0zm-3.06 6.48h1.8v4.32h2.88V6.48h1.8v10.8h-1.8v-4.68H10.9v4.68H9.1V6.48zm9 0h1.8v10.8h-1.8V6.48z"/>
-  </svg>
-);
-
-// ===========================================
-// TYPES
-// ===========================================
-
-interface ContactSectionProps {
-  profile?: Profile | null;
-}
-
-// ===========================================
-// CONTACT REASONS
-// ===========================================
-
-const contactReasons = [
-  { value: 'project', label: 'New Project' },
-  { value: 'job', label: 'Job Opportunity' },
-  { value: 'collaboration', label: 'Collaboration' },
-  { value: 'other', label: 'Other' },
-];
-
-// ===========================================
-// ANIMATION VARIANTS
-// ===========================================
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
+  const links = [
+    {
+      label: "GitHub",
+      href: profile?.github || personData.socialProfiles.github,
+      Icon: Github,
     },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
+    {
+      label: "Telegram",
+      href: profile?.telegram || personData.socialProfiles.telegram,
+      Icon: Send,
     },
-  },
-};
+    {
+      label: "LinkedIn",
+      href: profile?.linkedin || personData.socialProfiles.linkedin,
+      Icon: Linkedin,
+    },
+    { label: "hh.uz", href: profile?.hhuz, Icon: Briefcase },
+    { label: "Website", href: profile?.website, Icon: Globe },
+    { label: "Résumé", href: profile?.resumeUrl, Icon: Download },
+  ];
 
-// ===========================================
-// COMPONENT
-// ===========================================
-
-export function ContactSection({ profile }: ContactSectionProps) {
   return (
-    <section id="contact" className="py-20 lg:py-32">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SectionHeader
-          number="06"
-          label="Contact"
-          title="Let's build"
-          titleHighlight="something great"
-          description="Have a project in mind? Looking for a Flutter developer to join your team? I'd love to hear from you."
+    <section id="contact" className="contact-section portfolio-container">
+      <SpotlightCard
+        className="contact-panel relative overflow-hidden !border-zinc-800/80 !bg-[#111113]/90 backdrop-blur-xl p-8 sm:p-14 lg:p-20 text-center"
+        spotlightColor="rgba(6, 182, 212, 0.09)"
+        borderSpotlightColor="rgba(168, 85, 247, 0.35)"
+        radius={500}
+      >
+        {/* Subtle ambient spotlight glow behind the panel */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-b from-cyan-500/20 via-purple-500/15 to-transparent blur-3xl opacity-60"
         />
 
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
-          {/* Contact Info */}
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-100px' }}
-          >
-            {/* Info Cards */}
-            <div className="space-y-4 mb-8">
-              {profile?.email && (
-                <motion.a
-                  href={`mailto:${profile.email}`}
-                  className="block"
-                  variants={itemVariants}
-                >
-                  <Card hover className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center">
-                      <Mail className="w-6 h-6 text-primary-600 dark:text-primary-400" />
-                    </div>
-                    <div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">Email</div>
-                      <div className="font-medium text-gray-900 dark:text-white">
-                        {profile.email}
-                      </div>
-                    </div>
-                  </Card>
-                </motion.a>
-              )}
+        <div className="relative z-10">
+          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-500/30 bg-cyan-950/30 px-3.5 py-1 text-xs font-mono text-cyan-300 mb-6 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+            <Sparkles size={13} className="text-cyan-400 animate-pulse" />
+            <span>06 / LET’S COLLABORATE</span>
+          </div>
 
-              {profile?.location && (
-                <motion.div variants={itemVariants}>
-                  <Card className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-secondary-100 dark:bg-secondary-900/30 flex items-center justify-center">
-                      <MapPin className="w-6 h-6 text-secondary-600 dark:text-secondary-400" />
-                    </div>
-                    <div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">Location</div>
-                      <div className="font-medium text-gray-900 dark:text-white">
-                        {profile.location}
-                      </div>
-                    </div>
-                  </Card>
-                </motion.div>
-              )}
-            </div>
+          <h2 className="text-4xl sm:text-6xl lg:text-7xl font-medium tracking-tight text-white">
+            Your next idea.
+            <br />
+            <span className="bg-gradient-to-r from-cyan-400 via-teal-300 to-purple-400 bg-clip-text text-transparent">
+              Let’s build it.
+            </span>
+          </h2>
 
-            {/* Social Links */}
-            <motion.div variants={itemVariants}>
-              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">
-                Connect with me
-              </h3>
-              <div className="flex flex-wrap gap-3">
-                {profile?.github && (
-                  <a
-                    href={profile.github}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 rounded-lg bg-gray-100 dark:bg-dark-card text-gray-600 dark:text-gray-400 hover:bg-primary-100 hover:text-primary-600 dark:hover:bg-primary-900/30 dark:hover:text-primary-400 transition-colors"
-                    title="GitHub"
-                  >
-                    <Github className="w-5 h-5" />
-                  </a>
-                )}
-                {profile?.linkedin && (
-                  <a
-                    href={profile.linkedin}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 rounded-lg bg-gray-100 dark:bg-dark-card text-gray-600 dark:text-gray-400 hover:bg-primary-100 hover:text-primary-600 dark:hover:bg-primary-900/30 dark:hover:text-primary-400 transition-colors"
-                    title="LinkedIn"
-                  >
-                    <Linkedin className="w-5 h-5" />
-                  </a>
-                )}
-                {profile?.telegram && (
-                  <a
-                    href={profile.telegram}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 rounded-lg bg-gray-100 dark:bg-dark-card text-gray-600 dark:text-gray-400 hover:bg-[#0088cc]/10 hover:text-[#0088cc] dark:hover:bg-[#0088cc]/20 dark:hover:text-[#0088cc] transition-colors"
-                    title="Telegram"
-                  >
-                    <TelegramIcon />
-                  </a>
-                )}
-                {profile?.hhuz && (
-                  <a
-                    href={profile.hhuz}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 rounded-lg bg-gray-100 dark:bg-dark-card text-gray-600 dark:text-gray-400 hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400 transition-colors"
-                    title="hh.uz"
-                  >
-                    <HHIcon />
-                  </a>
-                )}
-                {profile?.website && (
-                  <a
-                    href={profile.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-3 rounded-lg bg-gray-100 dark:bg-dark-card text-gray-600 dark:text-gray-400 hover:bg-primary-100 hover:text-primary-600 dark:hover:bg-primary-900/30 dark:hover:text-primary-400 transition-colors"
-                    title="Website"
-                  >
-                    <Globe className="w-5 h-5" />
-                  </a>
+          <p className="max-w-xl mx-auto text-zinc-400 mt-6 text-sm sm:text-base leading-relaxed">
+            Have a project in mind or a team that needs an experienced Flutter developer?
+            <br className="hidden sm:block" /> I’d love to hear what you’re working on.
+          </p>
+
+          {/* Action Row: Primary Say Hello + Interactive Copy Email Pill */}
+          <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <MagneticButton>
+              <a
+                href={`mailto:${email}`}
+                className="portfolio-button group shadow-[0_0_25px_rgba(6,182,212,0.25)] hover:shadow-[0_0_35px_rgba(6,182,212,0.4)] transition-all"
+              >
+                <span>Say hello</span>
+                <ArrowUpRight
+                  size={19}
+                  className="transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                />
+              </a>
+            </MagneticButton>
+
+            {/* Centered, ultra-interactive copy pill with no detached icons */}
+            <div
+              onClick={handleCopyEmail}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleCopyEmail()}
+              className="group/copy relative flex cursor-pointer items-center gap-3 rounded-xl border border-zinc-800 bg-zinc-900/90 px-4 py-3 text-sm backdrop-blur-md transition-all duration-200 hover:border-cyan-500/50 hover:bg-zinc-850 hover:shadow-[0_0_20px_rgba(6,182,212,0.15)] active:scale-95 select-none"
+              aria-label="Copy email address to clipboard"
+            >
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-cyan-950/60 text-cyan-400 border border-cyan-500/30 group-hover/copy:border-cyan-400 transition-colors">
+                <Mail size={14} />
+              </div>
+              <span className="font-mono text-xs text-zinc-300 group-hover/copy:text-white transition-colors">
+                {email}
+              </span>
+              <div className="ml-1 flex items-center gap-1.5 rounded-md bg-zinc-800 px-2.5 py-1 text-[11px] font-medium text-zinc-400 group-hover/copy:bg-cyan-500/20 group-hover/copy:text-cyan-300 transition-colors">
+                {copied ? (
+                  <>
+                    <Check size={12} className="text-emerald-400" />
+                    <span className="text-emerald-400">Copied</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy size={12} />
+                    <span>Copy</span>
+                  </>
                 )}
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
 
-          {/* Contact Form */}
-          <motion.div
-            variants={itemVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: '-100px' }}
-          >
-            <Card className="shadow-lg">
-              <form className="space-y-5">
-                <div className="grid sm:grid-cols-2 gap-5">
-                  <Input
-                    label="Name"
-                    placeholder="Your name"
-                    required
-                  />
-                  <Input
-                    label="Email"
-                    type="email"
-                    placeholder="your@email.com"
-                    required
-                  />
-                </div>
-                <Select
-                  label="Subject"
-                  placeholder="What's this about?"
-                  options={contactReasons}
-                  required
-                />
-                <Textarea
-                  label="Message"
-                  placeholder="Tell me about your project or opportunity..."
-                  rows={5}
-                  required
-                />
-                <Button
-                  type="submit"
-                  className="w-full"
-                  rightIcon={<Send className="w-4 h-4" />}
-                >
-                  Send Message
-                </Button>
-              </form>
-            </Card>
-          </motion.div>
+          {/* Availability / Location Live Status Banner */}
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-5 text-xs text-zinc-500">
+            <span className="inline-flex items-center gap-2">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              </span>
+              <span className="text-zinc-400">Usually replies in &lt; 24h</span>
+            </span>
+            <span className="hidden sm:inline text-zinc-700">•</span>
+            <span className="inline-flex items-center gap-1.5 text-zinc-400">
+              <MapPin size={13} className="text-cyan-400" />
+              Tashkent, Uzbekistan (UTC+5)
+            </span>
+          </div>
+
+          {/* Interactive Social Channels Dock */}
+          <div className="mt-12 pt-8 border-t border-zinc-800/80">
+            <p className="text-[11px] font-mono uppercase tracking-widest text-zinc-500 mb-5">
+              Connect across the web
+            </p>
+            <div className="flex flex-wrap justify-center items-center gap-2.5 sm:gap-3.5">
+              {links
+                .filter((link) => link.href)
+                .map(({ label, href, Icon }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group/social inline-flex items-center gap-2 rounded-xl border border-zinc-850 bg-zinc-900/60 px-3.5 py-2 text-xs font-medium text-zinc-300 backdrop-blur-md transition-all duration-300 hover:border-cyan-500/40 hover:bg-zinc-800/90 hover:text-white hover:-translate-y-0.5 hover:shadow-[0_4px_20px_rgba(6,182,212,0.15)]"
+                  >
+                    <Icon
+                      size={15}
+                      className="text-zinc-400 transition-colors group-hover/social:text-cyan-400"
+                    />
+                    <span>{label}</span>
+                    <ArrowUpRight
+                      size={13}
+                      className="text-zinc-500 transition-all duration-300 group-hover/social:text-cyan-300 group-hover/social:translate-x-0.5 group-hover/social:-translate-y-0.5"
+                    />
+                  </a>
+                ))}
+            </div>
+          </div>
         </div>
-      </div>
+      </SpotlightCard>
     </section>
   );
 }
 
 export default ContactSection;
-

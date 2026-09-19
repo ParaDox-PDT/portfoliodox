@@ -1,11 +1,12 @@
 'use client';
 
 // ===========================================
-// HOME PAGE (CLIENT-SIDE DATA FETCHING)
+// HOME PAGE (CLIENT-SIDE DATA FETCHING WITH LOADING STATE)
 // ===========================================
 
 import { useEffect, useState, useRef } from 'react';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import {
@@ -32,11 +33,6 @@ import {
   mockCertificates,
 } from '@/lib/mockData';
 import type { Profile, Skill, Experience, Project, Certificate } from '@/types';
-import { Loader2 } from 'lucide-react';
-
-// ===========================================
-// PAGE COMPONENT
-// ===========================================
 
 export default function HomePage() {
   const pathname = usePathname();
@@ -57,7 +53,7 @@ export default function HomePage() {
       clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(() => {
         sessionStorage.setItem('homeScrollPosition', window.scrollY.toString());
-      }, 150); // Debounce scroll events
+      }, 150);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -73,12 +69,18 @@ export default function HomePage() {
     if (pathname !== '/' || loading) return;
 
     const restoreScroll = () => {
+      if (window.location.hash) {
+        requestAnimationFrame(() => {
+          document.getElementById(window.location.hash.slice(1))?.scrollIntoView();
+        });
+        scrollRestored.current = true;
+        return;
+      }
       const savedScrollPosition = sessionStorage.getItem('homeScrollPosition');
       if (savedScrollPosition && !scrollRestored.current) {
         const position = parseInt(savedScrollPosition, 10);
         if (position > 0) {
-          // Try multiple times to ensure page is fully rendered
-          const tryRestore = (attempt: number = 0) => {
+          const tryRestore = (attempt = 0) => {
             if (attempt > 5) {
               scrollRestored.current = true;
               return;
@@ -86,14 +88,12 @@ export default function HomePage() {
 
             requestAnimationFrame(() => {
               const currentScroll = window.scrollY;
-              // Only restore if we're at the top (meaning page just loaded)
               if (currentScroll === 0 || attempt === 0) {
                 window.scrollTo({
                   top: position,
                   behavior: 'auto',
                 });
                 
-                // Verify scroll was successful
                 setTimeout(() => {
                   if (Math.abs(window.scrollY - position) < 10) {
                     scrollRestored.current = true;
@@ -118,27 +118,21 @@ export default function HomePage() {
       }
     };
 
-    // Reset scrollRestored when pathname changes
-    if (pathname === '/') {
-      scrollRestored.current = false;
-      restoreScroll();
-    }
+    scrollRestored.current = false;
+    restoreScroll();
   }, [pathname, loading]);
 
-  // Handle browser back/forward buttons with better timing
+  // Handle browser back/forward buttons
   useEffect(() => {
-    const handlePopState = (e: PopStateEvent) => {
-      // Check if we're navigating to home page
+    const handlePopState = () => {
       if (window.location.pathname === '/') {
         scrollRestored.current = false;
         
-        // Wait for Next.js to update the route
         setTimeout(() => {
           const savedScrollPosition = sessionStorage.getItem('homeScrollPosition');
           if (savedScrollPosition) {
             const position = parseInt(savedScrollPosition, 10);
             if (position > 0) {
-              // Try multiple times with increasing delays
               const attempts = [50, 100, 200, 300, 500];
               attempts.forEach((delay, index) => {
                 setTimeout(() => {
@@ -149,7 +143,6 @@ export default function HomePage() {
                         behavior: 'auto',
                       });
                       
-                      // Check if scroll was successful
                       setTimeout(() => {
                         if (Math.abs(window.scrollY - position) < 10) {
                           scrollRestored.current = true;
@@ -175,10 +168,10 @@ export default function HomePage() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  // Fetch real data from Firebase on mount
   useEffect(() => {
     async function fetchData() {
       try {
-        // Try to fetch from Firebase
         const [profileRes, skillsRes, experienceRes, projectsRes, certificatesRes] = await Promise.all([
           getProfile().catch((err) => {
             console.error('Error fetching profile:', err);
@@ -202,111 +195,76 @@ export default function HomePage() {
           }),
         ]);
 
-        // Check if we're in development mode
-        const isDevelopment = process.env.NODE_ENV === 'development';
-
-        // Use Firebase data if available
-        // In production, show empty state if no data
-        // In development, fallback to mock data for easier testing
-        if (profileRes.data) {
-          setProfile(profileRes.data);
-        } else if (isDevelopment) {
-          setProfile(mockProfile);
-        } else {
-          setProfile(null);
-        }
-
-        // Skills: Always prefer Firebase data, only use mock in development if Firebase fails
-        if (skillsRes.data && skillsRes.data.length > 0) {
-          console.log(`✅ Loaded ${skillsRes.data.length} skills from Firebase`);
-          setSkills(skillsRes.data);
-        } else if (skillsRes.error) {
-          console.warn('⚠️ Firebase skills error:', skillsRes.error);
-          // Only use mock data in development if there's an error
-          if (isDevelopment) {
-            console.warn('Using mock skills data in development');
-            setSkills(mockSkills);
-          } else {
-            setSkills([]);
-          }
-        } else {
-          // No error but no data - check if Firebase is working
-          console.log('ℹ️ No skills found in Firebase (empty collection)');
-          // In production, show empty state. In development, use mock for testing
-          if (isDevelopment) {
-            setSkills(mockSkills);
-          } else {
-            setSkills([]);
-          }
-        }
-
-        if (experienceRes.data && experienceRes.data.length > 0) {
-          setExperience(experienceRes.data);
-        } else if (isDevelopment) {
-          setExperience(mockExperience);
-        } else {
-          setExperience([]);
-        }
-
-        if (projectsRes.data && projectsRes.data.length > 0) {
-          setProjects(projectsRes.data);
-        } else if (isDevelopment) {
-          setProjects(mockProjects);
-        } else {
-          setProjects([]);
-        }
-
-        if (certificatesRes.data && certificatesRes.data.length > 0) {
-          setCertificates(certificatesRes.data);
-        } else if (isDevelopment) {
-          setCertificates(mockCertificates);
-        } else {
-          setCertificates([]);
-        }
-      } catch (error: any) {
+        setProfile(profileRes.data || mockProfile);
+        setSkills(skillsRes.data && skillsRes.data.length > 0 ? skillsRes.data : mockSkills);
+        setExperience(experienceRes.data && experienceRes.data.length > 0 ? experienceRes.data : mockExperience);
+        setProjects(projectsRes.data && projectsRes.data.length > 0 ? projectsRes.data : mockProjects);
+        setCertificates(certificatesRes.data && certificatesRes.data.length > 0 ? certificatesRes.data : mockCertificates);
+      } catch (error) {
         console.error('Unexpected error fetching data:', error);
-        // Only use mock data in development
-        if (process.env.NODE_ENV === 'development') {
-          setProfile(mockProfile);
-          setSkills(mockSkills);
-          setExperience(mockExperience);
-          setProjects(mockProjects);
-          setCertificates(mockCertificates);
-        }
+        setProfile(mockProfile);
+        setSkills(mockSkills);
+        setExperience(mockExperience);
+        setProjects(mockProjects);
+        setCertificates(mockCertificates);
       } finally {
         setLoading(false);
       }
     }
 
-    // Add a small delay to prevent hydration issues
-    const timer = setTimeout(() => {
-      fetchData();
-    }, 100);
-
-    return () => clearTimeout(timer);
+    fetchData();
   }, []);
 
-  // Don't show loading spinner - IntroLoader handles initial loading
-  // Only show content when data is ready
+  // Loading state while real data is arriving from Firebase (No fake data flash)
   if (loading) {
-    return null;
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-[#09090b] text-zinc-100">
+        <div className="relative flex flex-col items-center gap-6">
+          {/* Glowing brand emblem with actual logo */}
+          <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl border border-zinc-800 bg-zinc-900/90 p-2.5 shadow-[0_0_35px_rgba(6,182,212,0.25)]">
+            <Image
+              src="/logo.png"
+              alt="PortfolioDox"
+              width={42}
+              height={42}
+              className="object-contain"
+              priority
+            />
+            <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center">
+              <span className="absolute h-full w-full animate-ping rounded-full bg-cyan-400 opacity-60" />
+              <span className="h-2 w-2 rounded-full bg-cyan-400" />
+            </span>
+          </div>
+
+          {/* Title & subtle loading pulse bar */}
+          <div className="flex flex-col items-center gap-3">
+            <span className="font-mono text-sm font-medium tracking-wider text-zinc-200">
+              PortfolioDox
+            </span>
+            <div className="relative h-1 w-36 overflow-hidden rounded-full bg-zinc-800">
+              <div className="absolute inset-0 -translate-x-full animate-[shimmer_1.4s_infinite] bg-gradient-to-r from-transparent via-cyan-400 to-transparent" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
     <>
       <Navbar name={profile?.name} />
       
-      <main>
-        <HeroSection profile={profile} />
-        <AboutSection profile={profile} />
-        <ExperienceSection experience={experience} />
+      <main id="main-content" className="portfolio-main">
+        {profile && <HeroSection profile={profile} />}
         <ProjectsSection projects={projects} />
-        <CertificatesSection certificates={certificates} />
+        {profile && <AboutSection profile={profile} />}
+        <ExperienceSection experience={experience} />
         <SkillsSection skills={skills} />
-        <ContactSection profile={profile} />
+        <CertificatesSection certificates={certificates} />
+        {profile && <ContactSection profile={profile} />}
       </main>
 
-      <Footer profile={profile} />
+      {profile && <Footer profile={profile} />}
     </>
   );
 }

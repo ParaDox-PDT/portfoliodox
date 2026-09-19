@@ -57,7 +57,7 @@ export default function AboutPage() {
       <BreadcrumbJsonLd items={breadcrumbItems} />
       
       {/* Page Content */}
-      <main className="min-h-screen bg-gradient-to-b from-[#0a0a0b] to-[#111113]">
+      <main id="main-content" className="min-h-screen bg-gradient-to-b from-[#0a0a0b] to-[#111113]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
           
           {/* Header */}
